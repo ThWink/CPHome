@@ -21,4 +21,25 @@ describe("health routes", () => {
 
     await app.close();
   });
+
+  it("returns ready status after database migration", async () => {
+    const app = await buildApp({
+      databaseUrl: ":memory:"
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/health/ready"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      status: "ok",
+      checks: {
+        database: "ok"
+      }
+    });
+
+    await app.close();
+  });
 });
