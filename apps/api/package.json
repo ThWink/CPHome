@@ -5,12 +5,12 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "corepack pnpm --filter @couple-life/shared build && tsc -p tsconfig.json",
     "dev": "tsx watch src/index.ts",
     "lint": "tsc -p tsconfig.json --noEmit",
     "start": "node dist/index.js",
-    "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "test": "corepack pnpm --filter @couple-life/shared build && vitest run",
+    "typecheck": "corepack pnpm --filter @couple-life/shared build && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@couple-life/shared": "workspace:*",
