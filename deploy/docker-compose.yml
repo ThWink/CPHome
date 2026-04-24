@@ -1,0 +1,26 @@
+services:
+  app-api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    image: couple-life-assistant-api:local
+    container_name: couple-life-assistant-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL:-file:/data/app.db}
+    ports:
+      - "${API_PORT:-3000}:3000"
+    volumes:
+      - couple-life-data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  couple-life-data:
