@@ -6,3 +6,28 @@ export type {
 } from "./setup.js";
 
 export { parseInitializeCoupleInput } from "./setup.js";
+
+export type {
+  BudgetMood,
+  MealKind,
+  MealMemoryParseRequest,
+  MealMemoryParseResult,
+  MealRecommendation,
+  MealRecommendationsResponse,
+  MealRecord,
+  MealRecordInput,
+  PersonTarget,
+  PreferenceCategory,
+  PreferenceInput,
+  PreferenceSentiment,
+  RecommendationRequest,
+  RecommendationSlot,
+  TastePreference,
+  WeatherMood
+} from "./meal.js";
+
+export {
+  parseMealRecordInput,
+  parsePreferenceInput,
+  parseRecommendationRequest
+} from "./meal.js";
