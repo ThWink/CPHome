@@ -7,7 +7,7 @@ RUN corepack enable
 WORKDIR /app
 
 FROM base AS deps
-COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY packages/shared/package.json packages/shared/package.json
 COPY apps/api/package.json apps/api/package.json
 RUN pnpm install --frozen-lockfile
@@ -15,6 +15,7 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS build
 COPY packages/shared packages/shared
 COPY apps/api apps/api
+RUN pnpm install --frozen-lockfile --offline
 RUN pnpm --filter @couple-life/shared build
 RUN pnpm --filter @couple-life/api build
 
