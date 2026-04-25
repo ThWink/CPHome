@@ -24,11 +24,21 @@ http://192.168.1.10:3000
 
 After the API address is reachable, open the home page and enter the setup page to initialize the one-couple deployment.
 
+For a clean local walkthrough, seed readable demo data from the repo root:
+
+```bash
+corepack pnpm --filter @couple-life/api seed:demo
+```
+
 Current local MVP pages:
 
 - Home: backend status, binding status, dashboard cards.
 - Setup: initialize the one-couple deployment.
 - Meals: takeout recommendations, roulette, and meal memory confirmation.
+- Weather: local weather advice for takeout and errands.
 - Water: record today's drink counts for both people.
 - Parcels: publish pending parcels and mark them picked.
 - Expenses: record recent shared takeout expenses.
+- Todos: create and complete shared daily tasks.
+- Anniversaries: track upcoming important dates.
+- Assistant: ask the local life assistant, with optional LLM provider support from the API.

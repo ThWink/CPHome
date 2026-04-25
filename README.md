@@ -17,6 +17,12 @@ pnpm typecheck
 pnpm dev:api
 ```
 
+To reset the local SQLite database with readable demo data:
+
+```bash
+corepack pnpm --filter @couple-life/api seed:demo
+```
+
 The API defaults to local-only assistant summaries. To enable a model provider, configure:
 
 ```bash

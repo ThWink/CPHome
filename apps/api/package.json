@@ -8,6 +8,7 @@
     "build": "corepack pnpm --filter @couple-life/shared build && tsc -p tsconfig.json",
     "dev": "tsx watch src/index.ts",
     "lint": "tsc -p tsconfig.json --noEmit",
+    "seed:demo": "tsx src/dev/seed-demo.ts",
     "start": "node dist/index.js",
     "test": "corepack pnpm --filter @couple-life/shared build && vitest run",
     "typecheck": "corepack pnpm --filter @couple-life/shared build && tsc -p tsconfig.json --noEmit"
