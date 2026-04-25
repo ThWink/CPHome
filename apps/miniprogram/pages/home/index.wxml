@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="row">
+    <view>
+      <view class="title">两人小家</view>
+      <view class="subtitle">今天的生活入口和状态概览</view>
+    </view>
+    <button class="button secondary" bindtap="goSettings">设置</button>
+  </view>
+
+  <view class="section panel">
+    <view class="label">服务状态</view>
+    <view class="value">{{readyText}}</view>
+  </view>
+
+  <view class="section panel">
+    <view class="row">
+      <view>
+        <view class="label">今晚吃什么</view>
+        <view class="value">外卖推荐和转盘拍板</view>
+      </view>
+      <button class="button" bindtap="goMeals">进入</button>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="panel">
+      <view class="label">天气</view>
+      <view class="value">{{weatherText}}</view>
+    </view>
+    <view class="panel card-gap">
+      <view class="label">喝水</view>
+      <view class="value">{{waterText}}</view>
+    </view>
+    <view class="panel card-gap">
+      <view class="label">快递</view>
+      <view class="value">{{parcelText}}</view>
+    </view>
+    <view class="panel card-gap">
+      <view class="label">记账</view>
+      <view class="value">{{expenseText}}</view>
+    </view>
+  </view>
+
+  <view class="section panel">
+    <view class="label">今天的时间线</view>
+    <view wx:for="{{timeline}}" wx:key="*this" class="timeline-item">{{item}}</view>
+  </view>
+</view>

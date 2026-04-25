@@ -1,0 +1,12 @@
+.card-gap {
+  margin-top: 18rpx;
+}
+
+.timeline-item {
+  margin-top: 18rpx;
+  padding-left: 20rpx;
+  border-left: 4rpx solid #2f6f62;
+  color: #3b352e;
+  font-size: 28rpx;
+  line-height: 1.5;
+}

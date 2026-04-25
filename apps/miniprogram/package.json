@@ -1,0 +1,11 @@
+{
+  "name": "@couple-life/miniprogram",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/validate-miniprogram.mjs",
+    "test": "node scripts/validate-miniprogram.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

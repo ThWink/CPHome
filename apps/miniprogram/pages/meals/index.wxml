@@ -1,0 +1,38 @@
+<view class="page">
+  <view class="title">今晚吃什么</view>
+  <view class="subtitle">{{statusText}}</view>
+
+  <view class="section">
+    <button class="button" loading="{{loading}}" bindtap="loadRecommendations">重新推荐</button>
+  </view>
+
+  <view class="section">
+    <view wx:for="{{recommendations}}" wx:key="slot" class="panel meal-card">
+      <view class="row">
+        <view class="label">{{item.slotLabel}}</view>
+        <view class="badge">{{item.estimatedMinutes}} 分钟</view>
+      </view>
+      <view class="value">{{item.title}}</view>
+      <view class="subtitle">{{item.vendorName}} · {{item.reason}}</view>
+    </view>
+  </view>
+
+  <view class="section panel">
+    <view class="label">转盘拍板</view>
+    <view class="value">{{rouletteResult || "还没转"}}</view>
+    <button class="button secondary action-gap" bindtap="spinRoulette">转一下</button>
+  </view>
+
+  <view class="section panel">
+    <view class="label">记录今天吃了什么</view>
+    <textarea class="textarea" value="{{memoryText}}" bindinput="onMemoryInput" maxlength="200" />
+    <view class="row action-gap">
+      <button class="button secondary half" bindtap="parseMemory">解析</button>
+      <button class="button half" bindtap="confirmMemory">确认保存</button>
+    </view>
+    <view wx:if="{{parsedMemory}}" class="preview">
+      <view class="label">待确认记忆</view>
+      <view class="subtitle">{{parsedMemory.memoryText}}</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/meals/index",
+    "pages/settings/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "两人小家",
+    "navigationBarBackgroundColor": "#f7f3ed",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f7f3ed"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
