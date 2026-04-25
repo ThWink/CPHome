@@ -369,6 +369,17 @@ describe("life routes", () => {
         }
       });
 
+      await app.inject({
+        method: "POST",
+        url: "/api/water/reminders",
+        payload: {
+          fromPerson: "self",
+          targetPerson: "partner",
+          remindOn: "2026-04-25",
+          message: "drink water"
+        }
+      });
+
       const response = await app.inject({
         method: "GET",
         url: "/api/dashboard/today?date=2026-04-25"
@@ -395,6 +406,12 @@ describe("life routes", () => {
           pendingParcels: [
             {
               pickupCode: "B-2048"
+            }
+          ],
+          pendingWaterReminders: [
+            {
+              targetPerson: "partner",
+              message: "drink water"
             }
           ],
           recentExpense: {

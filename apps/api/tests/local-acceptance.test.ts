@@ -30,6 +30,7 @@ describe("local acceptance verifier", () => {
         return jsonResponse({
           dashboard: {
             weather: { condition: "多云" },
+            pendingWaterReminders: [{ id: "wr1" }],
             pendingParcels: [{ id: "p1" }],
             openTodos: [{ id: "t1" }],
             upcomingAnniversaries: [{ id: "a1" }]

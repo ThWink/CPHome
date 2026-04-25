@@ -153,6 +153,7 @@ export interface DashboardToday {
   date: string;
   weather: WeatherToday;
   water: WaterTodaySummary;
+  pendingWaterReminders: WaterReminder[];
   pendingParcels: Parcel[];
   recentExpense: Expense | null;
   openTodos: Todo[];

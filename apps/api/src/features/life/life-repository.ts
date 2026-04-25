@@ -596,6 +596,7 @@ export function getDashboardToday(database: AppDatabase, date: string): Dashboar
     date,
     weather: getWeatherToday("本地"),
     water: getWaterTodaySummary(database, date),
+    pendingWaterReminders: listPendingWaterReminders(database, date),
     pendingParcels: listPendingParcels(database),
     recentExpense: listRecentExpenses(database, 1)[0] ?? null,
     openTodos: listOpenTodos(database),

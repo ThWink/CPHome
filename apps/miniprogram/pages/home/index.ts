@@ -28,6 +28,10 @@ interface DashboardResponse {
         totalMl: number;
       }>;
     };
+    pendingWaterReminders: Array<{
+      targetPerson: "self" | "partner";
+      message: string | null;
+    }>;
     pendingParcels: Array<{
       title: string;
       pickupCode: string;
@@ -62,8 +66,8 @@ Page({
     anniversaryText: "暂无纪念日提醒",
     heroText: "把今天的小事照看好",
     timeline: [
-      "可以先去“吃什么”生成今晚推荐",
-      "后续会接入喝水、快递、记账和天气"
+      "可以先去“今晚吃什么”生成外卖推荐",
+      "喝水、快递、记账和天气会在这里汇总"
     ]
   },
 
@@ -110,18 +114,20 @@ Page({
       return;
     }
 
-    const water = response.data.dashboard.water.people;
+    const dashboard = response.data.dashboard;
+    const water = dashboard.water.people;
     const selfWater = water.find((item) => item.person === "self");
     const partnerWater = water.find((item) => item.person === "partner");
-    const weather = response.data.dashboard.weather;
-    const parcels = response.data.dashboard.pendingParcels;
-    const recentExpense = response.data.dashboard.recentExpense;
-    const todos = response.data.dashboard.openTodos;
-    const anniversaries = response.data.dashboard.upcomingAnniversaries;
+    const weather = dashboard.weather;
+    const parcels = dashboard.pendingParcels;
+    const waterReminders = dashboard.pendingWaterReminders;
+    const recentExpense = dashboard.recentExpense;
+    const todos = dashboard.openTodos;
+    const anniversaries = dashboard.upcomingAnniversaries;
 
     this.setData({
       weatherText: `${weather.city} ${weather.condition} ${weather.temperatureC}℃ · ${weather.advice}`,
-      waterText: `我 ${selfWater?.drinkCount ?? 0} 次 / 对方 ${partnerWater?.drinkCount ?? 0} 次`,
+      waterText: `我 ${selfWater?.drinkCount ?? 0} 次 / 对方 ${partnerWater?.drinkCount ?? 0} 次，提醒 ${waterReminders.length} 个`,
       parcelText: parcels.length > 0
         ? `${parcels.length} 个待取，最近 ${parcels[0]?.pickupCode ?? ""}`
         : "暂无待取快递",
@@ -134,9 +140,12 @@ Page({
       anniversaryText: anniversaries.length > 0
         ? `${anniversaries[0]?.title ?? ""} · 还有 ${anniversaries[0]?.daysLeft ?? 0} 天`
         : "暂无纪念日提醒",
-      heroText: `${weather.condition} ${weather.temperatureC}℃，${todos.length} 个待办，${parcels.length} 个快递待取`,
+      heroText: `${weather.condition} ${weather.temperatureC}℃，${todos.length} 个待办，${parcels.length} 个快递，${waterReminders.length} 个喝水提醒`,
       timeline: [
         `天气：${weather.condition}，${weather.advice}`,
+        waterReminders.length > 0
+          ? `喝水提醒：${waterReminders[0]?.message ?? "记得喝水"}`
+          : "没有待处理喝水提醒",
         todos.length > 0 ? `待办：${todos[0]?.title ?? ""}` : "今天没有未完成待办",
         parcels.length > 0 ? `快递：${parcels[0]?.pickupCode ?? ""}` : "暂无待取快递",
         anniversaries.length > 0 ? `纪念日：${anniversaries[0]?.title ?? ""}` : "没有临近纪念日"
