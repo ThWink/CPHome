@@ -3,7 +3,7 @@
   <view class="subtitle">{{statusText}}</view>
 
   <view class="section">
-    <button class="button" loading="{{loading}}" bindtap="loadRecommendations">重新推荐</button>
+    <button class="button" loading="{{loading}}" bindtap="refreshMeals">重新推荐</button>
   </view>
 
   <view class="section">
@@ -20,7 +20,43 @@
   <view class="section panel">
     <view class="label">转盘拍板</view>
     <view class="value">{{rouletteResult || "还没转"}}</view>
-    <button class="button secondary action-gap" bindtap="spinRoulette">转一下</button>
+    <button class="button secondary action-gap" bindtap="spinRoulette">转一个</button>
+  </view>
+
+  <view class="section panel">
+    <view class="row">
+      <view>
+        <view class="label">想吃请求</view>
+        <view class="value request-title">{{requestStatusText}}</view>
+      </view>
+      <button class="button secondary small-button" bindtap="loadMealRequests">刷新</button>
+    </view>
+
+    <view class="field-gap">
+      <view class="label">想吃什么</view>
+      <input class="input" value="{{requestTitle}}" bindinput="onRequestTitleInput" placeholder="比如 番茄牛腩饭" />
+    </view>
+    <view class="field-gap">
+      <view class="label">店铺</view>
+      <input class="input" value="{{requestVendor}}" bindinput="onRequestVendorInput" placeholder="可选，比如 楼下盖饭" />
+    </view>
+    <view class="field-gap">
+      <view class="label">备注</view>
+      <input class="input" value="{{requestNote}}" bindinput="onRequestNoteInput" placeholder="不要太辣、今天想吃热的" />
+    </view>
+    <button class="button action-gap" bindtap="createMealRequest">发给对方</button>
+
+    <view wx:for="{{mealRequests}}" wx:key="id" class="request-row">
+      <view class="request-main">
+        <view class="label">{{item.vendorName || "未指定店铺"}}</view>
+        <view class="value">{{item.title}}</view>
+        <view class="subtitle">{{item.note || "没有备注"}}</view>
+      </view>
+      <view class="request-actions">
+        <button class="button secondary action-button" data-id="{{item.id}}" bindtap="markRequestPlanned">安排</button>
+        <button class="button soft action-button" data-id="{{item.id}}" bindtap="dismissRequest">忽略</button>
+      </view>
+    </view>
   </view>
 
   <view class="section panel">

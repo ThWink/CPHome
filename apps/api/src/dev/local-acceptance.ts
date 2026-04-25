@@ -50,6 +50,13 @@ interface MemoriesResponse {
   memories?: unknown[];
 }
 
+interface MealRequestResponse {
+  request?: {
+    id?: unknown;
+    status?: unknown;
+  };
+}
+
 interface ExpenseSummaryResponse {
   summary?: {
     totalCents?: unknown;
@@ -274,6 +281,45 @@ export async function runLocalAcceptance(
     return response.status === 200 && Array.isArray(response.body.memories)
       ? pass("meal memories", `${response.body.memories.length} memory rows visible`)
       : fail("meal memories", `meal memories failed, got HTTP ${response.status}`);
+  })) {
+    return finish(checks);
+  }
+
+  if (!await appendCheck(checks, async () => {
+    const createResponse = await readJson<MealRequestResponse>(
+      "/api/meals/requests",
+      options,
+      {
+        method: "POST",
+        body: {
+          requester: "self",
+          target: "partner",
+          title: "local acceptance meal request",
+          vendorName: "local vendor",
+          note: "acceptance check"
+        }
+      }
+    );
+    const requestId = createResponse.body.request?.id;
+
+    if (createResponse.status !== 201 || typeof requestId !== "string") {
+      return fail("meal requests", `meal request creation failed, got HTTP ${createResponse.status}`);
+    }
+
+    const updateResponse = await readJson<MealRequestResponse>(
+      `/api/meals/requests/${encodeURIComponent(requestId)}/status`,
+      options,
+      {
+        method: "PATCH",
+        body: {
+          status: "planned"
+        }
+      }
+    );
+
+    return updateResponse.status === 200 && updateResponse.body.request?.status === "planned"
+      ? pass("meal requests", "meal request can be created and planned")
+      : fail("meal requests", `meal request update failed, got HTTP ${updateResponse.status}`);
   })) {
     return finish(checks);
   }

@@ -16,6 +16,10 @@
   margin-top: 20rpx;
 }
 
+.field-gap {
+  margin-top: 20rpx;
+}
+
 .half {
   width: 48%;
 }
@@ -24,4 +28,42 @@
   margin-top: 22rpx;
   padding-top: 20rpx;
   border-top: 1rpx solid #e1d7ca;
+}
+
+.request-title {
+  font-size: 28rpx;
+}
+
+.small-button {
+  width: 132rpx;
+  min-width: 132rpx;
+}
+
+.request-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 18rpx;
+  margin-top: 22rpx;
+  padding-top: 22rpx;
+  border-top: 1rpx solid #e1d7ca;
+}
+
+.request-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.request-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  width: 132rpx;
+}
+
+.action-button {
+  width: 132rpx;
+  height: 62rpx;
+  padding: 0;
+  line-height: 62rpx;
 }

@@ -67,6 +67,14 @@ describe("local acceptance verifier", () => {
         return jsonResponse({ memories: [{ id: "m1", content: "少辣" }] });
       }
 
+      if (url.endsWith("/api/meals/requests")) {
+        return jsonResponse({ request: { id: "mr1", status: "pending" } }, 201);
+      }
+
+      if (url.endsWith("/api/meals/requests/mr1/status")) {
+        return jsonResponse({ request: { id: "mr1", status: "planned" } });
+      }
+
       if (url.includes("/api/expenses/summary")) {
         return jsonResponse({
           summary: {
@@ -101,6 +109,7 @@ describe("local acceptance verifier", () => {
       "water reminders",
       "meal recommendations",
       "meal memories",
+      "meal requests",
       "expense summary",
       "assistant"
     ]);

@@ -5,6 +5,7 @@ export type PreferenceSentiment = "like" | "dislike" | "avoid";
 export type WeatherMood = "normal" | "cold" | "hot" | "rainy";
 export type BudgetMood = "save" | "normal" | "treat";
 export type RecommendationSlot = "fastest" | "favorite" | "today";
+export type MealRequestStatus = "pending" | "planned" | "dismissed";
 
 export interface MealRecordInput {
   occurredOn: string;
@@ -20,6 +21,25 @@ export interface MealRecordInput {
 export interface MealRecord extends MealRecordInput {
   id: string;
   createdAt: string;
+}
+
+export interface MealRequestInput {
+  requester: PersonTarget;
+  target: PersonTarget;
+  title: string;
+  vendorName: string | null;
+  note: string | null;
+}
+
+export interface MealRequest extends MealRequestInput {
+  id: string;
+  status: MealRequestStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MealRequestStatusInput {
+  status: MealRequestStatus;
 }
 
 export interface PreferenceInput {
@@ -76,6 +96,7 @@ const preferenceCategories: PreferenceCategory[] = ["dish", "cuisine", "taste", 
 const preferenceSentiments: PreferenceSentiment[] = ["like", "dislike", "avoid"];
 const weatherMoods: WeatherMood[] = ["normal", "cold", "hot", "rainy"];
 const budgetMoods: BudgetMood[] = ["save", "normal", "treat"];
+const mealRequestStatuses: MealRequestStatus[] = ["pending", "planned", "dismissed"];
 
 function normalizeRequiredText(value: unknown, fieldName: string): string {
   if (typeof value !== "string") {
@@ -173,6 +194,34 @@ export function parseMealRecordInput(input: unknown): MealRecordInput {
     amountCents: normalizeAmount(record.amountCents),
     rating: normalizeRating(record.rating),
     note: normalizeNullableText(record.note, "note")
+  };
+}
+
+export function parseMealRequestInput(input: unknown): MealRequestInput {
+  if (typeof input !== "object" || input === null) {
+    throw new Error("meal request input must be an object");
+  }
+
+  const record = input as Record<string, unknown>;
+
+  return {
+    requester: normalizeEnum(record.requester, personTargets, "requester"),
+    target: normalizeEnum(record.target, personTargets, "target"),
+    title: normalizeRequiredText(record.title, "title"),
+    vendorName: normalizeNullableText(record.vendorName, "vendorName"),
+    note: normalizeNullableText(record.note, "note")
+  };
+}
+
+export function parseMealRequestStatusInput(input: unknown): MealRequestStatusInput {
+  if (typeof input !== "object" || input === null) {
+    throw new Error("meal request status input must be an object");
+  }
+
+  const record = input as Record<string, unknown>;
+
+  return {
+    status: normalizeEnum(record.status, mealRequestStatuses, "status")
   };
 }
 

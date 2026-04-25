@@ -16,6 +16,10 @@ export type {
   MealRecommendationsResponse,
   MealRecord,
   MealRecordInput,
+  MealRequest,
+  MealRequestInput,
+  MealRequestStatus,
+  MealRequestStatusInput,
   PersonTarget,
   PreferenceCategory,
   PreferenceInput,
@@ -27,6 +31,8 @@ export type {
 } from "./meal.js";
 
 export {
+  parseMealRequestInput,
+  parseMealRequestStatusInput,
   parseMealRecordInput,
   parsePreferenceInput,
   parseRecommendationRequest

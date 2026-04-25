@@ -42,7 +42,7 @@ Current local MVP pages:
 
 - Home: backend status, binding status, dashboard cards.
 - Setup: initialize the one-couple deployment.
-- Meals: takeout recommendations, roulette, and meal memory confirmation.
+- Meals: takeout recommendations, roulette, meal requests, and meal memory confirmation.
 - Weather: online weather with local fallback advice for takeout and errands.
 - Water: record today's drink counts and create/complete drink-water reminders.
 - Parcels: publish parcels with ownership, mark them picked, or cancel mistaken entries.

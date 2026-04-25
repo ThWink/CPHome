@@ -9,9 +9,23 @@ interface MealRecommendation {
   weight: number;
 }
 
+interface MealRequest {
+  id: string;
+  requester: "self" | "partner" | "both";
+  target: "self" | "partner" | "both";
+  title: string;
+  vendorName: string | null;
+  note: string | null;
+  status: "pending" | "planned" | "dismissed";
+}
+
 interface RecommendationsResponse {
   recommendations: MealRecommendation[];
   rouletteCandidates: MealRecommendation[];
+}
+
+interface MealRequestsResponse {
+  requests: MealRequest[];
 }
 
 interface ParseResponse {
@@ -22,9 +36,9 @@ interface ParseResponse {
 }
 
 const slotLabels: Record<MealRecommendation["slot"], string> = {
-  fastest: "最快拍板",
+  fastest: "最快能到",
   favorite: "她可能喜欢",
-  today: "今天适合吃"
+  today: "今天适合"
 };
 
 Page({
@@ -33,13 +47,26 @@ Page({
     recommendations: [] as Array<MealRecommendation & { slotLabel: string }>,
     rouletteCandidates: [] as MealRecommendation[],
     rouletteResult: "",
+    requestTitle: "",
+    requestVendor: "",
+    requestNote: "",
+    mealRequests: [] as MealRequest[],
+    requestStatusText: "暂无想吃请求",
     memoryText: "今天吃了麻辣烫，花了45，她觉得不错但不要太辣。",
     parsedMemory: null as ParseResponse | null,
     statusText: "先生成推荐，或者记录今天吃了什么"
   },
 
   onLoad() {
-    void this.loadRecommendations();
+    void this.refreshMeals();
+  },
+
+  onShow() {
+    void this.loadMealRequests();
+  },
+
+  async refreshMeals() {
+    await Promise.all([this.loadRecommendations(), this.loadMealRequests()]);
   },
 
   async loadRecommendations() {
@@ -70,6 +97,21 @@ Page({
     });
   },
 
+  async loadMealRequests() {
+    const response = await requestApi<MealRequestsResponse>("/api/meals/requests/pending");
+    if (!response.ok || !response.data) {
+      this.setData({ requestStatusText: "想吃请求未连接" });
+      return;
+    }
+
+    this.setData({
+      mealRequests: response.data.requests,
+      requestStatusText: response.data.requests.length > 0
+        ? `${response.data.requests.length} 个想吃请求待安排`
+        : "暂无想吃请求"
+    });
+  },
+
   spinRoulette() {
     const candidates = this.data.rouletteCandidates as MealRecommendation[];
     if (candidates.length === 0) {
@@ -93,6 +135,77 @@ Page({
     this.setData({
       rouletteResult: `${result.title} · ${result.vendorName}`
     });
+  },
+
+  onRequestTitleInput(event: { detail: { value: string } }) {
+    this.setData({ requestTitle: event.detail.value });
+  },
+
+  onRequestVendorInput(event: { detail: { value: string } }) {
+    this.setData({ requestVendor: event.detail.value });
+  },
+
+  onRequestNoteInput(event: { detail: { value: string } }) {
+    this.setData({ requestNote: event.detail.value });
+  },
+
+  async createMealRequest() {
+    const title = `${this.data.requestTitle ?? ""}`.trim();
+    if (!title) {
+      wx.showToast({ title: "先写想吃什么", icon: "none" });
+      return;
+    }
+
+    const response = await requestApi("/api/meals/requests", {
+      method: "POST",
+      data: {
+        requester: "self",
+        target: "partner",
+        title,
+        vendorName: `${this.data.requestVendor ?? ""}`.trim() || null,
+        note: `${this.data.requestNote ?? ""}`.trim() || null
+      }
+    });
+
+    if (!response.ok) {
+      wx.showToast({ title: "发布失败", icon: "none" });
+      return;
+    }
+
+    this.setData({
+      requestTitle: "",
+      requestVendor: "",
+      requestNote: ""
+    });
+    await this.loadMealRequests();
+  },
+
+  async markRequestPlanned(event: { currentTarget: { dataset: { id?: string } } }) {
+    await this.updateMealRequestStatus(event.currentTarget.dataset.id, "planned");
+  },
+
+  async dismissRequest(event: { currentTarget: { dataset: { id?: string } } }) {
+    await this.updateMealRequestStatus(event.currentTarget.dataset.id, "dismissed");
+  },
+
+  async updateMealRequestStatus(id: string | undefined, status: "planned" | "dismissed") {
+    if (!id) {
+      return;
+    }
+
+    const response = await requestApi(`/api/meals/requests/${id}/status`, {
+      method: "PATCH",
+      data: {
+        status
+      }
+    });
+
+    if (!response.ok) {
+      wx.showToast({ title: "更新失败", icon: "none" });
+      return;
+    }
+
+    await this.loadMealRequests();
   },
 
   onMemoryInput(event: { detail: { value: string } }) {
@@ -143,7 +256,7 @@ Page({
     });
 
     if (response.ok) {
-      void this.loadRecommendations();
+      await this.loadRecommendations();
     }
   }
 });

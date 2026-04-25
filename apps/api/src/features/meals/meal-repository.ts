@@ -1,6 +1,10 @@
 import {
+  parseMealRequestInput,
+  parseMealRequestStatusInput,
   parseMealRecordInput,
   parsePreferenceInput,
+  type MealRequest,
+  type MealRequestStatus,
   type MealRecord,
   type TastePreference
 } from "@couple-life/shared";
@@ -18,6 +22,18 @@ interface MealRecordRow {
   rating: number | null;
   note: string | null;
   created_at: string;
+}
+
+interface MealRequestRow {
+  id: string;
+  requester: MealRequest["requester"];
+  target: MealRequest["target"];
+  title: string;
+  vendor_name: string | null;
+  note: string | null;
+  status: MealRequestStatus;
+  created_at: string;
+  updated_at: string;
 }
 
 interface TastePreferenceRow {
@@ -90,6 +106,20 @@ function mapTastePreference(row: TastePreferenceRow): TastePreference {
   };
 }
 
+function mapMealRequest(row: MealRequestRow): MealRequest {
+  return {
+    id: row.id,
+    requester: row.requester,
+    target: row.target,
+    title: row.title,
+    vendorName: row.vendor_name,
+    note: row.note,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
 function mapMealMemory(row: MealMemoryRow): MealMemorySummary {
   return {
     id: row.id,
@@ -154,6 +184,56 @@ export function listRecentMealRecords(database: AppDatabase, limit: number): Mea
     .all(safeLimit) as MealRecordRow[];
 
   return rows.map(mapMealRecord);
+}
+
+export function createMealRequest(database: AppDatabase, input: unknown): MealRequest {
+  const parsed = parseMealRequestInput(input);
+  const id = nanoid();
+
+  database.sqlite
+    .prepare(`
+      insert into meal_requests (
+        id,
+        requester,
+        target,
+        title,
+        vendor_name,
+        note
+      ) values (?, ?, ?, ?, ?, ?)
+    `)
+    .run(id, parsed.requester, parsed.target, parsed.title, parsed.vendorName, parsed.note);
+
+  const row = database.sqlite
+    .prepare("select * from meal_requests where id = ?")
+    .get(id) as MealRequestRow;
+
+  return mapMealRequest(row);
+}
+
+export function listPendingMealRequests(database: AppDatabase): MealRequest[] {
+  const rows = database.sqlite
+    .prepare("select * from meal_requests where status = 'pending' order by created_at desc")
+    .all() as MealRequestRow[];
+
+  return rows.map(mapMealRequest);
+}
+
+export function updateMealRequestStatus(database: AppDatabase, id: string, input: unknown): MealRequest {
+  const parsed = parseMealRequestStatusInput(input);
+
+  database.sqlite
+    .prepare("update meal_requests set status = ?, updated_at = CURRENT_TIMESTAMP where id = ?")
+    .run(parsed.status, id);
+
+  const row = database.sqlite
+    .prepare("select * from meal_requests where id = ?")
+    .get(id) as MealRequestRow | undefined;
+
+  if (!row) {
+    throw new Error("meal request not found");
+  }
+
+  return mapMealRequest(row);
 }
 
 export function upsertTastePreference(database: AppDatabase, input: unknown): TastePreference {

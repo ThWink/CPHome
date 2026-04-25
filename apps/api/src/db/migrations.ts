@@ -42,6 +42,21 @@ export function runMigrations(sqlite: SqliteDatabase): void {
       note text,
       created_at text not null default CURRENT_TIMESTAMP
     );
+
+    create table if not exists meal_requests (
+      id text primary key,
+      requester text not null check (requester in ('self', 'partner', 'both')),
+      target text not null check (target in ('self', 'partner', 'both')),
+      title text not null,
+      vendor_name text,
+      note text,
+      status text not null default 'pending' check (status in ('pending', 'planned', 'dismissed')),
+      created_at text not null default CURRENT_TIMESTAMP,
+      updated_at text not null default CURRENT_TIMESTAMP
+    );
+
+    create index if not exists idx_meal_requests_status
+      on meal_requests(status, updated_at);
   `);
 
   if (!columnExists(sqlite, "meal_records", "meal_kind")) {

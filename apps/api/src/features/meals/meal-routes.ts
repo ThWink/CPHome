@@ -4,11 +4,14 @@ import { parseMealMemoryText } from "./meal-memory-parser.js";
 import { recommendMeals } from "./meal-recommendation-service.js";
 import {
   createMealRecord,
+  createMealRequest,
   deleteMealMemory,
   listMealMemories,
+  listPendingMealRequests,
   listRecentMealRecords,
   listTastePreferences,
-  saveConfirmedMealMemory
+  saveConfirmedMealMemory,
+  updateMealRequestStatus
 } from "./meal-repository.js";
 
 export interface MealRouteOptions {
@@ -52,6 +55,53 @@ export async function registerMealRoutes(
   app: FastifyInstance,
   options: MealRouteOptions
 ): Promise<void> {
+  app.post("/api/meals/requests", async (request, reply) => {
+    try {
+      const mealRequest = createMealRequest(options.database, request.body);
+      return reply.code(201).send({ request: mealRequest });
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.code(400).send({
+          error: "INVALID_MEAL_REQUEST_INPUT",
+          message: error.message
+        });
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/meals/requests/pending", async () => ({
+    requests: listPendingMealRequests(options.database)
+  }));
+
+  app.patch("/api/meals/requests/:id/status", async (request, reply) => {
+    const params = request.params as { id?: string };
+    const id = params.id?.trim();
+    if (!id) {
+      return reply.code(400).send({
+        error: "INVALID_MEAL_REQUEST_ID",
+        message: "meal request id is required"
+      });
+    }
+
+    try {
+      const mealRequest = updateMealRequestStatus(options.database, id, request.body);
+      return { request: mealRequest };
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.code(error.message === "meal request not found" ? 404 : 400).send({
+          error: error.message === "meal request not found"
+            ? "MEAL_REQUEST_NOT_FOUND"
+            : "INVALID_MEAL_REQUEST_STATUS",
+          message: error.message
+        });
+      }
+
+      throw error;
+    }
+  });
+
   app.get("/api/meals/recent", async () => ({
     meals: listRecentMealRecords(options.database, 20)
   }));

@@ -2,6 +2,70 @@ import { describe, expect, it } from "vitest";
 import { buildApp } from "../src/server/build-app.js";
 
 describe("meal routes", () => {
+  it("creates pending meal requests and marks them planned", async () => {
+    const app = await buildApp({ databaseUrl: ":memory:" });
+
+    try {
+      const createResponse = await app.inject({
+        method: "POST",
+        url: "/api/meals/requests",
+        payload: {
+          requester: "partner",
+          target: "self",
+          title: "番茄牛腩饭",
+          vendorName: "楼下盖饭",
+          note: "今晚想吃这个，不要太辣"
+        }
+      });
+
+      expect(createResponse.statusCode).toBe(201);
+      const request = createResponse.json().request;
+      expect(request).toMatchObject({
+        requester: "partner",
+        target: "self",
+        title: "番茄牛腩饭",
+        vendorName: "楼下盖饭",
+        note: "今晚想吃这个，不要太辣",
+        status: "pending"
+      });
+
+      const pendingResponse = await app.inject({
+        method: "GET",
+        url: "/api/meals/requests/pending"
+      });
+
+      expect(pendingResponse.statusCode).toBe(200);
+      expect(pendingResponse.json()).toMatchObject({
+        requests: [
+          {
+            id: request.id,
+            title: "番茄牛腩饭",
+            status: "pending"
+          }
+        ]
+      });
+
+      const updateResponse = await app.inject({
+        method: "PATCH",
+        url: `/api/meals/requests/${request.id}/status`,
+        payload: {
+          status: "planned"
+        }
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+      expect(updateResponse.json().request.status).toBe("planned");
+
+      const nextPendingResponse = await app.inject({
+        method: "GET",
+        url: "/api/meals/requests/pending"
+      });
+      expect(nextPendingResponse.json()).toEqual({ requests: [] });
+    } finally {
+      await app.close();
+    }
+  });
+
   it("creates and lists manual meal records", async () => {
     const app = await buildApp({ databaseUrl: ":memory:" });
 
