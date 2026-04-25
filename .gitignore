@@ -14,3 +14,4 @@ Thumbs.db
 apps/miniprogram/**/*.js
 apps/miniprogram/project.private.config.json
 .superpowers/
+功能.md
