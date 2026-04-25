@@ -14,7 +14,17 @@
 
   <view class="section panel">
     <view class="row">
-      <view>
+      <view class="row-main">
+        <view class="label">情侣绑定</view>
+        <view class="value">{{setupText}}</view>
+      </view>
+      <button class="button secondary" bindtap="goSetup">{{setupConfigured ? "查看" : "去绑定"}}</button>
+    </view>
+  </view>
+
+  <view class="section panel">
+    <view class="row">
+      <view class="row-main">
         <view class="label">今晚吃什么</view>
         <view class="value">外卖推荐和转盘拍板</view>
       </view>

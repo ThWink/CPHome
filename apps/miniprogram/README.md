@@ -21,3 +21,5 @@ When testing on a phone, use the LAN address of the machine or Orange Pi running
 ```text
 http://192.168.1.10:3000
 ```
+
+After the API address is reachable, open the home page and enter the setup page to initialize the one-couple deployment.

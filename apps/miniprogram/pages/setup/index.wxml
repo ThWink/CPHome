@@ -1,0 +1,34 @@
+<view class="page">
+  <view class="title">情侣绑定</view>
+  <view class="subtitle">{{statusText}}</view>
+
+  <view class="section panel">
+    <view class="label">情侣空间名称</view>
+    <input class="input" value="{{coupleName}}" disabled="{{configured}}" maxlength="40" bindinput="onCoupleNameInput" placeholder="两人小家" />
+
+    <view class="field-gap">
+      <view class="label">你的昵称</view>
+      <input class="input" value="{{selfName}}" disabled="{{configured}}" maxlength="40" bindinput="onSelfNameInput" placeholder="比如 Wink" />
+    </view>
+
+    <view class="field-gap">
+      <view class="label">对方昵称</view>
+      <input class="input" value="{{partnerName}}" disabled="{{configured}}" maxlength="40" bindinput="onPartnerNameInput" placeholder="比如 宝宝" />
+    </view>
+
+    <button wx:if="{{!configured}}" class="button action-gap" loading="{{loading}}" bindtap="initializeCouple">完成绑定</button>
+    <button wx:else class="button secondary action-gap" bindtap="loadSetupStatus">刷新状态</button>
+  </view>
+
+  <view wx:if="{{inviteCode}}" class="section panel">
+    <view class="label">邀请码</view>
+    <view class="invite-code">{{inviteCode}}</view>
+    <view class="subtitle">当前版本会一次性创建两名成员，这个邀请码先作为后续真实邀请绑定能力的预留。</view>
+  </view>
+
+  <view class="section panel">
+    <view class="label">后端连接</view>
+    <view class="subtitle">如果一直提示未连接，先到设置里把后端地址改成电脑或香橙派的局域网 IP。</view>
+    <button class="button secondary action-gap" bindtap="goSettings">去设置</button>
+  </view>
+</view>

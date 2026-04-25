@@ -21,6 +21,7 @@ function assertFile(relativePath) {
 const app = readJson("app.json");
 const expectedPages = [
   "pages/home/index",
+  "pages/setup/index",
   "pages/meals/index",
   "pages/settings/index"
 ];

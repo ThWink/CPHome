@@ -2,6 +2,11 @@
   margin-top: 18rpx;
 }
 
+.row-main {
+  min-width: 0;
+  flex: 1;
+}
+
 .timeline-item {
   margin-top: 18rpx;
   padding-left: 20rpx;
