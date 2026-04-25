@@ -23,6 +23,12 @@ To reset the local SQLite database with readable demo data:
 corepack pnpm --filter @couple-life/api seed:demo
 ```
 
+With the API running, verify the local V1 walkthrough:
+
+```bash
+corepack pnpm verify:local
+```
+
 API data routes are open by default for local development. Set `API_TOKEN` in
 deployment environments to require `x-couple-api-token` or
 `Authorization: Bearer <token>` on `/api/*` requests.

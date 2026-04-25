@@ -32,6 +32,12 @@ For a clean local walkthrough, seed readable demo data from the repo root:
 corepack pnpm --filter @couple-life/api seed:demo
 ```
 
+Then verify the local backend flow before opening WeChat DevTools:
+
+```bash
+corepack pnpm verify:local
+```
+
 Current local MVP pages:
 
 - Home: backend status, binding status, dashboard cards.

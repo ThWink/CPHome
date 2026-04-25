@@ -11,7 +11,8 @@
     "seed:demo": "tsx src/dev/seed-demo.ts",
     "start": "node dist/index.js",
     "test": "corepack pnpm --filter @couple-life/shared build && vitest run",
-    "typecheck": "corepack pnpm --filter @couple-life/shared build && tsc -p tsconfig.json --noEmit"
+    "typecheck": "corepack pnpm --filter @couple-life/shared build && tsc -p tsconfig.json --noEmit",
+    "verify:local": "tsx src/dev/verify-local.ts"
   },
   "dependencies": {
     "@couple-life/shared": "workspace:*",

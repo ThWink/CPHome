@@ -13,7 +13,8 @@
     "dev:api": "corepack pnpm --filter @couple-life/api dev",
     "lint": "corepack pnpm -r lint",
     "test": "corepack pnpm -r test",
-    "typecheck": "corepack pnpm -r typecheck"
+    "typecheck": "corepack pnpm -r typecheck",
+    "verify:local": "corepack pnpm --filter @couple-life/api verify:local"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
