@@ -19,6 +19,7 @@ function assertFile(relativePath) {
 }
 
 const app = readJson("app.json");
+const generatedMarker = "Generated from TypeScript";
 const expectedPages = [
   "pages/home/index",
   "pages/setup/index",
@@ -38,15 +39,28 @@ for (const page of expectedPages) {
     throw new Error(`app.json must include page: ${page}`);
   }
 
-  for (const extension of ["json", "ts", "wxml", "wxss"]) {
+  for (const extension of ["json", "ts", "js", "wxml", "wxss"]) {
     assertFile(`${page}.${extension}`);
+  }
+
+  const jsContent = readFileSync(join(root, `${page}.js`), "utf8");
+  if (!jsContent.includes(generatedMarker)) {
+    throw new Error(`${page}.js must be generated from its TypeScript source`);
   }
 }
 
 assertFile("app.ts");
+assertFile("app.js");
+if (!readFileSync(join(root, "app.js"), "utf8").includes(generatedMarker)) {
+  throw new Error("app.js must be generated from app.ts");
+}
 assertFile("app.wxss");
 assertFile("sitemap.json");
 assertFile("utils/request.ts");
+assertFile("utils/request.js");
+if (!readFileSync(join(root, "utils/request.js"), "utf8").includes(generatedMarker)) {
+  throw new Error("utils/request.js must be generated from utils/request.ts");
+}
 readJson("project.config.json");
 
 console.log("Mini Program structure is valid.");

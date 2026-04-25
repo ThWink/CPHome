@@ -11,6 +11,7 @@
   "scripts": {
     "build": "corepack pnpm -r build",
     "dev:api": "corepack pnpm --filter @couple-life/api dev",
+    "local:ready": "corepack pnpm --filter @couple-life/miniprogram build && corepack pnpm local:start && corepack pnpm verify:local",
     "local:start": "powershell -ExecutionPolicy Bypass -File ./scripts/start-local-api.ps1",
     "local:stop": "powershell -ExecutionPolicy Bypass -File ./scripts/stop-local-api.ps1",
     "lint": "corepack pnpm -r lint",

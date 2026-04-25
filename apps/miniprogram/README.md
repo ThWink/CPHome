@@ -10,10 +10,10 @@ Open this directory in WeChat DevTools:
 apps/miniprogram
 ```
 
-Start the local API from the repository root:
+Prepare the local Mini Program JavaScript files and start the local API from the repository root:
 
 ```powershell
-corepack pnpm local:start
+corepack pnpm local:ready
 ```
 
 Use the Settings page in the Mini Program to configure the API base URL. During local development it defaults to:

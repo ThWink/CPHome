@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/validate-miniprogram.mjs",
-    "test": "node scripts/validate-miniprogram.mjs",
+    "compile": "node scripts/compile-miniprogram-ts.mjs",
+    "build": "node scripts/compile-miniprogram-ts.mjs && node scripts/validate-miniprogram.mjs",
+    "test": "node scripts/compile-miniprogram-ts.mjs && node scripts/validate-miniprogram.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }
