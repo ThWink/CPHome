@@ -27,6 +27,25 @@ export interface Expense extends ExpenseInput {
   createdAt: string;
 }
 
+export interface ExpenseCategorySummary {
+  category: ExpenseCategory;
+  amountCents: number;
+  count: number;
+}
+
+export interface ExpensePayerSummary {
+  payer: PersonTarget;
+  amountCents: number;
+  count: number;
+}
+
+export interface ExpenseMonthlySummary {
+  month: string;
+  totalCents: number;
+  byCategory: ExpenseCategorySummary[];
+  byPayer: ExpensePayerSummary[];
+}
+
 export interface ParcelInput {
   title: string;
   pickupCode: string;

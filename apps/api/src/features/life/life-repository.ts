@@ -9,6 +9,7 @@ import {
   type Anniversary,
   type DashboardToday,
   type Expense,
+  type ExpenseMonthlySummary,
   type Parcel,
   type ParcelStatus,
   type Todo,
@@ -28,6 +29,18 @@ interface ExpenseRow {
   amount_cents: number;
   note: string | null;
   created_at: string;
+}
+
+interface ExpenseCategorySummaryRow {
+  category: Expense["category"];
+  amount_cents: number;
+  count: number;
+}
+
+interface ExpensePayerSummaryRow {
+  payer: Expense["payer"];
+  amount_cents: number;
+  count: number;
 }
 
 interface ParcelRow {
@@ -142,12 +155,38 @@ export function normalizeLocalDate(value: unknown): string {
   return value;
 }
 
+export function normalizeLocalMonth(value: unknown): string {
+  if (value === undefined || value === null || value === "") {
+    return new Date().toISOString().slice(0, 7);
+  }
+
+  if (typeof value !== "string" || !/^\d{4}-\d{2}$/.test(value)) {
+    throw new Error("month must use YYYY-MM");
+  }
+
+  const monthNumber = Number(value.slice(5, 7));
+  if (monthNumber < 1 || monthNumber > 12) {
+    throw new Error("month must use YYYY-MM");
+  }
+
+  return value;
+}
+
 function parseDateUtc(date: string): Date {
   return new Date(`${date}T00:00:00.000Z`);
 }
 
 function formatDateUtc(date: Date): string {
   return date.toISOString().slice(0, 10);
+}
+
+function getNextMonth(month: string): string {
+  const year = Number(month.slice(0, 4));
+  const monthNumber = Number(month.slice(5, 7));
+  const nextYear = monthNumber === 12 ? year + 1 : year;
+  const nextMonth = monthNumber === 12 ? 1 : monthNumber + 1;
+
+  return `${nextYear}-${String(nextMonth).padStart(2, "0")}`;
 }
 
 function daysBetween(start: string, end: string): number {
@@ -317,6 +356,54 @@ export function listRecentExpenses(database: AppDatabase, limit: number): Expens
     .all(safeLimit) as ExpenseRow[];
 
   return rows.map(mapExpense);
+}
+
+export function getExpenseMonthlySummary(database: AppDatabase, monthInput: unknown): ExpenseMonthlySummary {
+  const month = normalizeLocalMonth(monthInput);
+  const fromDate = `${month}-01`;
+  const toDate = `${getNextMonth(month)}-01`;
+  const totalRow = database.sqlite
+    .prepare(`
+      select coalesce(sum(amount_cents), 0) as total_cents
+      from expenses
+      where occurred_on >= ? and occurred_on < ?
+    `)
+    .get(fromDate, toDate) as { total_cents: number } | undefined;
+
+  const categoryRows = database.sqlite
+    .prepare(`
+      select category, sum(amount_cents) as amount_cents, count(*) as count
+      from expenses
+      where occurred_on >= ? and occurred_on < ?
+      group by category
+      order by amount_cents desc, category asc
+    `)
+    .all(fromDate, toDate) as ExpenseCategorySummaryRow[];
+
+  const payerRows = database.sqlite
+    .prepare(`
+      select payer, sum(amount_cents) as amount_cents, count(*) as count
+      from expenses
+      where occurred_on >= ? and occurred_on < ?
+      group by payer
+      order by amount_cents desc, payer asc
+    `)
+    .all(fromDate, toDate) as ExpensePayerSummaryRow[];
+
+  return {
+    month,
+    totalCents: totalRow?.total_cents ?? 0,
+    byCategory: categoryRows.map((row) => ({
+      category: row.category,
+      amountCents: row.amount_cents,
+      count: row.count
+    })),
+    byPayer: payerRows.map((row) => ({
+      payer: row.payer,
+      amountCents: row.amount_cents,
+      count: row.count
+    }))
+  };
 }
 
 export function createTodo(database: AppDatabase, input: unknown): Todo {

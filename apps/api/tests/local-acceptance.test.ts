@@ -48,6 +48,17 @@ describe("local acceptance verifier", () => {
         return jsonResponse({ memories: [{ id: "m1", content: "少辣" }] });
       }
 
+      if (url.includes("/api/expenses/summary")) {
+        return jsonResponse({
+          summary: {
+            month: "2026-04",
+            totalCents: 4580,
+            byCategory: [{ category: "takeout", amountCents: 4580, count: 1 }],
+            byPayer: [{ payer: "both", amountCents: 4580, count: 1 }]
+          }
+        });
+      }
+
       if (url.endsWith("/api/assistant/chat")) {
         return jsonResponse({ reply: "今天有待办和快递", source: "local" });
       }
@@ -69,6 +80,7 @@ describe("local acceptance verifier", () => {
       "dashboard",
       "meal recommendations",
       "meal memories",
+      "expense summary",
       "assistant"
     ]);
     expect(requests.every((request) => request.url.startsWith("http://127.0.0.1:3000/"))).toBe(true);

@@ -46,7 +46,7 @@ Current local MVP pages:
 - Weather: local weather advice for takeout and errands.
 - Water: record today's drink counts for both people.
 - Parcels: publish pending parcels and mark them picked.
-- Expenses: record recent shared takeout expenses.
+- Expenses: record categorized shared expenses with payer selection and monthly summary.
 - Todos: create and complete shared daily tasks.
 - Anniversaries: track upcoming important dates.
 - Assistant: ask the local life assistant, with optional LLM provider support from the API.

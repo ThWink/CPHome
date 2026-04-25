@@ -8,6 +8,7 @@ import {
   createTodo,
   createWaterDrink,
   getDashboardToday,
+  getExpenseMonthlySummary,
   getWeatherToday,
   getWaterTodaySummary,
   listOpenTodos,
@@ -15,6 +16,7 @@ import {
   listPendingParcels,
   listRecentExpenses,
   normalizeLocalDate,
+  normalizeLocalMonth,
   updateParcelStatus,
   updateTodoStatus
 } from "./life-repository.js";
@@ -30,6 +32,14 @@ function getQueryDate(query: unknown): string {
     : {};
 
   return normalizeLocalDate(record.date);
+}
+
+function getQueryMonth(query: unknown): string {
+  const record = typeof query === "object" && query !== null
+    ? query as Record<string, unknown>
+    : {};
+
+  return normalizeLocalMonth(record.month);
 }
 
 function getParcelId(params: unknown): string {
@@ -212,6 +222,24 @@ export async function registerLifeRoutes(
   app.get("/api/expenses/recent", async () => ({
     expenses: listRecentExpenses(options.database, 20)
   }));
+
+  app.get("/api/expenses/summary", async (request, reply) => {
+    try {
+      const month = getQueryMonth(request.query);
+      return {
+        summary: getExpenseMonthlySummary(options.database, month)
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.code(400).send({
+          error: "INVALID_EXPENSE_MONTH",
+          message: error.message
+        });
+      }
+
+      throw error;
+    }
+  });
 
   app.post("/api/todos", async (request, reply) => {
     try {

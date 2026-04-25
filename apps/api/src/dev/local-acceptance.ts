@@ -34,6 +34,14 @@ interface MemoriesResponse {
   memories?: unknown[];
 }
 
+interface ExpenseSummaryResponse {
+  summary?: {
+    totalCents?: unknown;
+    byCategory?: unknown[];
+    byPayer?: unknown[];
+  };
+}
+
 interface AssistantResponse {
   reply?: unknown;
   source?: unknown;
@@ -193,6 +201,24 @@ export async function runLocalAcceptance(
     return response.status === 200 && Array.isArray(response.body.memories)
       ? pass("meal memories", `${response.body.memories.length} memory rows visible`)
       : fail("meal memories", `meal memories failed, got HTTP ${response.status}`);
+  })) {
+    return finish(checks);
+  }
+
+  if (!await appendCheck(checks, async () => {
+    const month = options.today.slice(0, 7);
+    const response = await readJson<ExpenseSummaryResponse>(
+      `/api/expenses/summary?month=${encodeURIComponent(month)}`,
+      options
+    );
+    const summary = response.body.summary;
+
+    return response.status === 200 &&
+      typeof summary?.totalCents === "number" &&
+      Array.isArray(summary.byCategory) &&
+      Array.isArray(summary.byPayer)
+      ? pass("expense summary", "monthly expense summary is available")
+      : fail("expense summary", `expense summary failed, got HTTP ${response.status}`);
   })) {
     return finish(checks);
   }

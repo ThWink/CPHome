@@ -154,6 +154,85 @@ describe("life routes", () => {
     }
   });
 
+  it("returns monthly expense summary by category and payer", async () => {
+    const app = await buildApp({ databaseUrl: ":memory:" });
+
+    try {
+      await app.inject({
+        method: "POST",
+        url: "/api/expenses",
+        payload: {
+          occurredOn: "2026-04-25",
+          category: "takeout",
+          payer: "self",
+          amountCents: 4580,
+          note: "dinner takeout"
+        }
+      });
+      await app.inject({
+        method: "POST",
+        url: "/api/expenses",
+        payload: {
+          occurredOn: "2026-04-26",
+          category: "groceries",
+          payer: "partner",
+          amountCents: 2600,
+          note: "fruit"
+        }
+      });
+      await app.inject({
+        method: "POST",
+        url: "/api/expenses",
+        payload: {
+          occurredOn: "2026-05-01",
+          category: "takeout",
+          payer: "both",
+          amountCents: 1000,
+          note: "next month"
+        }
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/expenses/summary?month=2026-04"
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual({
+        summary: {
+          month: "2026-04",
+          totalCents: 7180,
+          byCategory: [
+            {
+              category: "takeout",
+              amountCents: 4580,
+              count: 1
+            },
+            {
+              category: "groceries",
+              amountCents: 2600,
+              count: 1
+            }
+          ],
+          byPayer: [
+            {
+              payer: "self",
+              amountCents: 4580,
+              count: 1
+            },
+            {
+              payer: "partner",
+              amountCents: 2600,
+              count: 1
+            }
+          ]
+        }
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
   it("returns dashboard data for today", async () => {
     const app = await buildApp({ databaseUrl: ":memory:" });
 

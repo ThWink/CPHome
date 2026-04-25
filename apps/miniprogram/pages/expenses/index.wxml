@@ -2,21 +2,81 @@
   <view class="title">记账</view>
   <view class="subtitle">{{statusText}}</view>
 
+  <view class="section panel summary-panel">
+    <view class="row">
+      <view>
+        <view class="label">{{month}} 本月支出</view>
+        <view class="summary-amount">¥{{totalText}}</view>
+      </view>
+      <button class="button secondary small-button" bindtap="refreshAll">刷新</button>
+    </view>
+
+    <view wx:if="{{categoryStats.length > 0}}" class="stats-block">
+      <view class="stats-title">分类统计</view>
+      <view wx:for="{{categoryStats}}" wx:key="label" class="stat-row">
+        <view>
+          <view class="stat-label">{{item.label}}</view>
+          <view class="stat-count">{{item.countText}}</view>
+        </view>
+        <view class="stat-amount">¥{{item.amountText}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{payerStats.length > 0}}" class="stats-block compact">
+      <view class="stats-title">付款人</view>
+      <view wx:for="{{payerStats}}" wx:key="label" class="stat-row">
+        <view>
+          <view class="stat-label">{{item.label}}</view>
+          <view class="stat-count">{{item.countText}}</view>
+        </view>
+        <view class="stat-amount">¥{{item.amountText}}</view>
+      </view>
+    </view>
+  </view>
+
   <view class="section panel">
     <view class="label">金额</view>
-    <input class="input" value="{{amountText}}" type="digit" bindinput="onAmountInput" placeholder="45.8" />
+    <input class="input" value="{{amountText}}" type="digit" bindinput="onAmountInput" placeholder="45.80" />
+
+    <view class="field-gap">
+      <view class="label">分类</view>
+      <view class="option-grid">
+        <view
+          wx:for="{{categoryOptions}}"
+          wx:key="value"
+          data-category="{{item.value}}"
+          bindtap="selectCategory"
+          class="option-chip {{selectedCategory === item.value ? 'active' : ''}}"
+        >{{item.label}}</view>
+      </view>
+    </view>
+
+    <view class="field-gap">
+      <view class="label">付款人</view>
+      <view class="option-grid payer-grid">
+        <view
+          wx:for="{{payerOptions}}"
+          wx:key="value"
+          data-payer="{{item.value}}"
+          bindtap="selectPayer"
+          class="option-chip {{selectedPayer === item.value ? 'active' : ''}}"
+        >{{item.label}}</view>
+      </view>
+    </view>
+
     <view class="field-gap">
       <view class="label">备注</view>
-      <input class="input" value="{{note}}" bindinput="onNoteInput" placeholder="晚饭外卖" />
+      <input class="input" value="{{note}}" bindinput="onNoteInput" placeholder="晚饭外卖、超市水果" />
     </view>
-    <button class="button action-gap" bindtap="createExpense">记一笔外卖</button>
+
+    <button class="button action-gap" bindtap="createExpense">记一笔</button>
   </view>
 
   <view class="section">
     <view wx:for="{{expenses}}" wx:key="id" class="panel expense-card">
       <view class="row">
-        <view>
-          <view class="label">{{item.occurredOn}} · {{item.categoryText}}</view>
+        <view class="expense-main">
+          <view class="label">{{item.occurredOn}} · {{item.categoryText}} · {{item.payerText}}</view>
           <view class="value">{{item.note}}</view>
         </view>
         <view class="amount">¥{{item.amountText}}</view>

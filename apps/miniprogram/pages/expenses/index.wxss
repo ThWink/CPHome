@@ -3,8 +3,104 @@
   margin-top: 22rpx;
 }
 
+.summary-panel {
+  background: linear-gradient(135deg, #fffaf5 0%, #f2f8ef 100%);
+}
+
+.summary-amount {
+  margin-top: 8rpx;
+  color: #2f6f62;
+  font-size: 48rpx;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.small-button {
+  width: 144rpx;
+  min-width: 144rpx;
+}
+
+.stats-block {
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #eadfd1;
+}
+
+.stats-block.compact {
+  margin-top: 16rpx;
+}
+
+.stats-title {
+  margin-bottom: 12rpx;
+  color: #7a8c68;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  min-height: 58rpx;
+}
+
+.stat-label {
+  color: #2b2520;
+  font-size: 27rpx;
+  font-weight: 700;
+}
+
+.stat-count {
+  margin-top: 4rpx;
+  color: #8a7663;
+  font-size: 22rpx;
+}
+
+.stat-amount {
+  color: #2f6f62;
+  font-size: 28rpx;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14rpx;
+  margin-top: 14rpx;
+}
+
+.payer-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.option-chip {
+  box-sizing: border-box;
+  min-height: 62rpx;
+  padding: 0 12rpx;
+  border: 1rpx solid #eadfd1;
+  border-radius: 14rpx;
+  background: #fffdf9;
+  color: #6f6255;
+  font-size: 24rpx;
+  font-weight: 600;
+  line-height: 62rpx;
+  text-align: center;
+}
+
+.option-chip.active {
+  border-color: #2f6f62;
+  background: #eaf4e7;
+  color: #2f6f62;
+}
+
 .expense-card {
   margin-bottom: 18rpx;
+}
+
+.expense-main {
+  min-width: 0;
 }
 
 .amount {
