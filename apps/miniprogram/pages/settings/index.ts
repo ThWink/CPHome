@@ -56,6 +56,14 @@ interface BackupExportResponse {
   };
 }
 
+interface BackupImportResponse {
+  imported: {
+    version: number;
+    importedAt: string;
+    tableCounts: Record<string, number>;
+  };
+}
+
 const sentimentLabels: Record<TastePreference["sentiment"], string> = {
   like: "喜欢",
   dislike: "少推荐",
@@ -69,6 +77,9 @@ Page({
     healthText: "未检查",
     memoryText: "未加载",
     backupText: "还没有生成备份",
+    restoreText: "未导入备份",
+    backupImportText: "",
+    restoreConfirmText: "",
     editingMemoryId: "",
     editingMemoryText: "",
     memories: [] as Array<MealMemory & { itemText: string }>,
@@ -240,5 +251,63 @@ Page({
         wx.showToast({ title: "复制失败", icon: "none" });
       }
     });
+  },
+
+  onBackupImportInput(event: { detail: { value: string } }) {
+    this.setData({ backupImportText: event.detail.value });
+  },
+
+  onRestoreConfirmInput(event: { detail: { value: string } }) {
+    this.setData({ restoreConfirmText: event.detail.value });
+  },
+
+  async restoreBackup() {
+    const rawBackup = `${this.data.backupImportText ?? ""}`.trim();
+    const confirm = `${this.data.restoreConfirmText ?? ""}`.trim();
+
+    if (rawBackup.length === 0) {
+      wx.showToast({ title: "请粘贴备份", icon: "none" });
+      return;
+    }
+
+    if (confirm !== "RESTORE_LOCAL_DATA") {
+      wx.showToast({ title: "确认口令不正确", icon: "none" });
+      return;
+    }
+
+    let backup: unknown;
+    try {
+      backup = JSON.parse(rawBackup);
+    } catch {
+      wx.showToast({ title: "JSON 不正确", icon: "none" });
+      return;
+    }
+
+    const response = await requestApi<BackupImportResponse>("/api/backup/import", {
+      method: "POST",
+      data: {
+        confirm,
+        backup
+      }
+    });
+
+    if (!response.ok || !response.data) {
+      this.setData({
+        restoreText: response.statusCode === 401 ? "Token 未填写或不正确" : "恢复失败"
+      });
+      wx.showToast({ title: "恢复失败", icon: "none" });
+      return;
+    }
+
+    const tableTotal = Object.values(response.data.imported.tableCounts)
+      .reduce((sum, count) => sum + count, 0);
+
+    this.setData({
+      restoreText: `已恢复 ${tableTotal} 条数据，导入时间 ${response.data.imported.importedAt}`,
+      backupImportText: "",
+      restoreConfirmText: ""
+    });
+    wx.showToast({ title: "已恢复", icon: "success" });
+    void this.loadMemoryData();
   }
 });

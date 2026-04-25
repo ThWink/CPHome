@@ -47,6 +47,25 @@
   line-height: 1.5;
 }
 
+.backup-editor {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 220rpx;
+  margin-top: 18rpx;
+  padding: 18rpx;
+  border: 1rpx solid #e4d6c6;
+  border-radius: 12rpx;
+  background: #fffdf8;
+  color: #2b2520;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.danger {
+  background: #9f3f35;
+  color: #fffaf2;
+}
+
 .preference-row {
   display: flex;
   align-items: center;

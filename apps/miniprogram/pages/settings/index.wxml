@@ -28,6 +28,25 @@
     <button class="button secondary action-gap" bindtap="copyBackup">复制备份 JSON</button>
   </view>
 
+  <view class="section panel">
+    <view class="label">恢复本地数据</view>
+    <view class="value">{{restoreText}}</view>
+    <textarea
+      class="backup-editor"
+      value="{{backupImportText}}"
+      bindinput="onBackupImportInput"
+      maxlength="-1"
+      placeholder="粘贴备份 JSON"
+    />
+    <input
+      class="input action-gap"
+      value="{{restoreConfirmText}}"
+      bindinput="onRestoreConfirmInput"
+      placeholder="输入 RESTORE_LOCAL_DATA"
+    />
+    <button class="button danger action-gap" bindtap="restoreBackup">恢复备份</button>
+  </view>
+
   <view class="section">
     <view class="row">
       <view>
