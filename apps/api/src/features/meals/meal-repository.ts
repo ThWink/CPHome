@@ -10,6 +10,7 @@ import {
 } from "@couple-life/shared";
 import { nanoid } from "nanoid";
 import type { AppDatabase } from "../../db/client.js";
+import { appendLifeEvent } from "../life/timeline-repository.js";
 
 interface MealRecordRow {
   id: string;
@@ -174,6 +175,20 @@ export function createMealRecord(database: AppDatabase, input: unknown): MealRec
     .prepare("select * from meal_records where id = ?")
     .get(id) as MealRecordRow;
 
+  appendLifeEvent(database, {
+    eventType: "meal",
+    title: "记录一餐",
+    subtitle: parsed.vendorName,
+    metadata: {
+      mealRecordId: id,
+      occurredOn: parsed.occurredOn,
+      mealKind: parsed.mealKind,
+      person: parsed.person,
+      items: parsed.items,
+      amountCents: parsed.amountCents
+    }
+  });
+
   return mapMealRecord(row);
 }
 
@@ -207,6 +222,18 @@ export function createMealRequest(database: AppDatabase, input: unknown): MealRe
     .prepare("select * from meal_requests where id = ?")
     .get(id) as MealRequestRow;
 
+  appendLifeEvent(database, {
+    eventType: "meal_request",
+    title: "想吃请求",
+    subtitle: parsed.title,
+    metadata: {
+      mealRequestId: id,
+      requester: parsed.requester,
+      target: parsed.target,
+      vendorName: parsed.vendorName
+    }
+  });
+
   return mapMealRequest(row);
 }
 
@@ -231,6 +258,20 @@ export function updateMealRequestStatus(database: AppDatabase, id: string, input
 
   if (!row) {
     throw new Error("meal request not found");
+  }
+
+  if (parsed.status !== "pending") {
+    appendLifeEvent(database, {
+      eventType: "meal_request",
+      title: parsed.status === "planned" ? "安排想吃请求" : "放下想吃请求",
+      subtitle: row.title,
+      metadata: {
+        mealRequestId: row.id,
+        status: parsed.status,
+        requester: row.requester,
+        target: row.target
+      }
+    });
   }
 
   return mapMealRequest(row);

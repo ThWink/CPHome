@@ -34,7 +34,8 @@ describe("local acceptance verifier", () => {
             pendingMealRequests: [{ id: "mr1" }],
             pendingParcels: [{ id: "p1" }],
             openTodos: [{ id: "t1" }],
-            upcomingAnniversaries: [{ id: "a1" }]
+            upcomingAnniversaries: [{ id: "a1" }],
+            timeline: [{ id: "event1", title: "记录喝水" }]
           }
         });
       }

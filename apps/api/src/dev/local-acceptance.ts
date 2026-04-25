@@ -24,6 +24,7 @@ interface DashboardResponse {
     pendingParcels?: unknown[];
     openTodos?: unknown[];
     upcomingAnniversaries?: unknown[];
+    timeline?: unknown[];
   };
 }
 
@@ -191,7 +192,8 @@ export async function runLocalAcceptance(
       Array.isArray(dashboard.pendingMealRequests) &&
       Array.isArray(dashboard.pendingParcels) &&
       Array.isArray(dashboard.openTodos) &&
-      Array.isArray(dashboard.upcomingAnniversaries)
+      Array.isArray(dashboard.upcomingAnniversaries) &&
+      Array.isArray(dashboard.timeline)
       ? pass("dashboard", "home dashboard data is available")
       : fail("dashboard", `dashboard data is incomplete, got HTTP ${response.status}`);
   })) {

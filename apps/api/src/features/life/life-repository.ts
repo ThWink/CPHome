@@ -26,6 +26,7 @@ import {
 } from "@couple-life/shared";
 import { nanoid } from "nanoid";
 import type { AppDatabase } from "../../db/client.js";
+import { appendLifeEvent, listLifeEvents } from "./timeline-repository.js";
 
 interface ExpenseRow {
   id: string;
@@ -236,6 +237,10 @@ function formatDateUtc(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+function formatAmountCents(amountCents: number): string {
+  return `${(amountCents / 100).toFixed(2)}元`;
+}
+
 function getNextMonth(month: string): string {
   const year = Number(month.slice(0, 4));
   const monthNumber = Number(month.slice(5, 7));
@@ -300,6 +305,18 @@ export function createWaterDrink(database: AppDatabase, input: unknown): WaterDr
     .prepare("select * from water_drinks where id = ?")
     .get(id) as WaterDrinkRow;
 
+  appendLifeEvent(database, {
+    eventType: "water",
+    title: "记录喝水",
+    subtitle: `${parsed.amountMl}ml`,
+    metadata: {
+      waterDrinkId: id,
+      person: parsed.person,
+      occurredOn: parsed.occurredOn,
+      amountMl: parsed.amountMl
+    }
+  });
+
   return mapWaterDrink(row);
 }
 
@@ -352,6 +369,18 @@ export function createWaterReminder(database: AppDatabase, input: unknown): Wate
     .prepare("select * from water_reminders where id = ?")
     .get(id) as WaterReminderRow;
 
+  appendLifeEvent(database, {
+    eventType: "water_reminder",
+    title: "提醒喝水",
+    subtitle: parsed.message ?? "记得喝水",
+    metadata: {
+      waterReminderId: id,
+      fromPerson: parsed.fromPerson,
+      targetPerson: parsed.targetPerson,
+      remindOn: parsed.remindOn
+    }
+  });
+
   return mapWaterReminder(row);
 }
 
@@ -382,6 +411,18 @@ export function updateWaterReminderStatus(database: AppDatabase, id: string, inp
     throw new Error("water reminder not found");
   }
 
+  if (parsed.status === "done") {
+    appendLifeEvent(database, {
+      eventType: "water_reminder",
+      title: "完成喝水提醒",
+      subtitle: row.message ?? "已完成",
+      metadata: {
+        waterReminderId: row.id,
+        targetPerson: row.target_person
+      }
+    });
+  }
+
   return mapWaterReminder(row);
 }
 
@@ -405,6 +446,18 @@ export function createParcel(database: AppDatabase, input: unknown): Parcel {
   const row = database.sqlite
     .prepare("select * from parcels where id = ?")
     .get(id) as ParcelRow;
+
+  appendLifeEvent(database, {
+    eventType: "parcel",
+    title: "新增快递",
+    subtitle: parsed.pickupCode,
+    metadata: {
+      parcelId: id,
+      owner: parsed.owner,
+      title: parsed.title,
+      location: parsed.location
+    }
+  });
 
   return mapParcel(row);
 }
@@ -432,6 +485,17 @@ export function updateParcelStatus(database: AppDatabase, id: string, input: unk
     throw new Error("parcel not found");
   }
 
+  appendLifeEvent(database, {
+    eventType: "parcel",
+    title: parsed.status === "picked" ? "快递已取" : "快递已取消",
+    subtitle: row.pickup_code,
+    metadata: {
+      parcelId: row.id,
+      status: parsed.status,
+      title: row.title
+    }
+  });
+
   return mapParcel(row);
 }
 
@@ -455,6 +519,19 @@ export function createExpense(database: AppDatabase, input: unknown): Expense {
   const row = database.sqlite
     .prepare("select * from expenses where id = ?")
     .get(id) as ExpenseRow;
+
+  appendLifeEvent(database, {
+    eventType: "expense",
+    title: "记了一笔账",
+    subtitle: parsed.note ?? formatAmountCents(parsed.amountCents),
+    metadata: {
+      expenseId: id,
+      category: parsed.category,
+      payer: parsed.payer,
+      amountCents: parsed.amountCents,
+      occurredOn: parsed.occurredOn
+    }
+  });
 
   return mapExpense(row);
 }
@@ -544,6 +621,17 @@ export function createTodo(database: AppDatabase, input: unknown): Todo {
     .prepare("select * from todos where id = ?")
     .get(id) as TodoRow;
 
+  appendLifeEvent(database, {
+    eventType: "todo",
+    title: "新增待办",
+    subtitle: parsed.title,
+    metadata: {
+      todoId: id,
+      assignee: parsed.assignee,
+      dueOn: parsed.dueOn
+    }
+  });
+
   return mapTodo(row);
 }
 
@@ -574,6 +662,18 @@ export function updateTodoStatus(database: AppDatabase, id: string, input: unkno
     throw new Error("todo not found");
   }
 
+  if (parsed.status === "done") {
+    appendLifeEvent(database, {
+      eventType: "todo",
+      title: "完成待办",
+      subtitle: row.title,
+      metadata: {
+        todoId: row.id,
+        assignee: row.assignee
+      }
+    });
+  }
+
   return mapTodo(row);
 }
 
@@ -596,6 +696,17 @@ export function createAnniversary(database: AppDatabase, input: unknown): Annive
   const row = database.sqlite
     .prepare("select * from anniversaries where id = ?")
     .get(id) as AnniversaryRow;
+
+  appendLifeEvent(database, {
+    eventType: "anniversary",
+    title: "新增纪念日",
+    subtitle: parsed.title,
+    metadata: {
+      anniversaryId: id,
+      date: parsed.date,
+      repeat: parsed.repeat
+    }
+  });
 
   return mapAnniversary(row);
 }
@@ -638,6 +749,7 @@ export function getDashboardToday(database: AppDatabase, date: string): Dashboar
     pendingParcels: listPendingParcels(database),
     recentExpense: listRecentExpenses(database, 1)[0] ?? null,
     openTodos: listOpenTodos(database),
-    upcomingAnniversaries: listUpcomingAnniversaries(database, date, 5)
+    upcomingAnniversaries: listUpcomingAnniversaries(database, date, 5),
+    timeline: listLifeEvents(database, 10)
   };
 }

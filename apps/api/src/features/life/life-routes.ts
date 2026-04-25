@@ -24,6 +24,7 @@ import {
   updateTodoStatus,
   updateWaterReminderStatus
 } from "./life-repository.js";
+import { listLifeEvents } from "./timeline-repository.js";
 
 export interface LifeRouteOptions {
   database: AppDatabase;
@@ -404,6 +405,10 @@ export async function registerLifeRoutes(
       throw error;
     }
   });
+
+  app.get("/api/life/timeline", async () => ({
+    events: listLifeEvents(options.database, 30)
+  }));
 
   app.post("/api/assistant/chat", async (request, reply) => {
     try {

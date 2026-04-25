@@ -50,6 +50,8 @@ export type {
   ExpenseInput,
   ExpenseMonthlySummary,
   ExpensePayerSummary,
+  LifeEvent,
+  LifeEventType,
   Parcel,
   ParcelInput,
   ParcelStatus,

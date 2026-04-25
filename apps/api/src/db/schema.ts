@@ -128,6 +128,16 @@ export const anniversaries = sqliteTable("anniversaries", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`)
 });
 
+export const lifeEvents = sqliteTable("life_events", {
+  id: text("id").primaryKey(),
+  eventType: text("event_type").notNull(),
+  title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  occurredAt: text("occurred_at").notNull(),
+  metadataJson: text("metadata_json").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+
 export const schema = {
   couples,
   users,
@@ -140,5 +150,6 @@ export const schema = {
   parcels,
   waterDrinks,
   todos,
-  anniversaries
+  anniversaries,
+  lifeEvents
 };

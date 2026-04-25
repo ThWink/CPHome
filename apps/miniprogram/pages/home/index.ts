@@ -55,6 +55,10 @@ interface DashboardResponse {
       nextOn: string;
       daysLeft: number;
     }>;
+    timeline: Array<{
+      title: string;
+      subtitle: string | null;
+    }>;
   };
 }
 
@@ -131,6 +135,21 @@ Page({
     const recentExpense = dashboard.recentExpense;
     const todos = dashboard.openTodos;
     const anniversaries = dashboard.upcomingAnniversaries;
+    const timeline = dashboard.timeline;
+    const timelineItems = timeline.length > 0
+      ? timeline.map((item) => item.subtitle ? `${item.title}：${item.subtitle}` : item.title)
+      : [
+        `天气：${weather.condition}，${weather.advice}`,
+        mealRequests.length > 0
+          ? `想吃：${mealRequests[0]?.title ?? ""}`
+          : "没有待安排想吃请求",
+        waterReminders.length > 0
+          ? `喝水提醒：${waterReminders[0]?.message ?? "记得喝水"}`
+          : "没有待处理喝水提醒",
+        todos.length > 0 ? `待办：${todos[0]?.title ?? ""}` : "今天没有未完成待办",
+        parcels.length > 0 ? `快递：${parcels[0]?.pickupCode ?? ""}` : "暂无待取快递",
+        anniversaries.length > 0 ? `纪念日：${anniversaries[0]?.title ?? ""}` : "没有临近纪念日"
+      ];
 
     this.setData({
       weatherText: `${weather.city} ${weather.condition} ${weather.temperatureC}℃ · ${weather.advice}`,
@@ -151,18 +170,7 @@ Page({
         ? `${anniversaries[0]?.title ?? ""} · 还有 ${anniversaries[0]?.daysLeft ?? 0} 天`
         : "暂无纪念日提醒",
       heroText: `${weather.condition} ${weather.temperatureC}℃，${todos.length} 个待办，${parcels.length} 个快递，${waterReminders.length} 个喝水提醒，${mealRequests.length} 个想吃请求`,
-      timeline: [
-        `天气：${weather.condition}，${weather.advice}`,
-        mealRequests.length > 0
-          ? `想吃：${mealRequests[0]?.title ?? ""}`
-          : "没有待安排想吃请求",
-        waterReminders.length > 0
-          ? `喝水提醒：${waterReminders[0]?.message ?? "记得喝水"}`
-          : "没有待处理喝水提醒",
-        todos.length > 0 ? `待办：${todos[0]?.title ?? ""}` : "今天没有未完成待办",
-        parcels.length > 0 ? `快递：${parcels[0]?.pickupCode ?? ""}` : "暂无待取快递",
-        anniversaries.length > 0 ? `纪念日：${anniversaries[0]?.title ?? ""}` : "没有临近纪念日"
-      ]
+      timeline: timelineItems
     });
   },
 

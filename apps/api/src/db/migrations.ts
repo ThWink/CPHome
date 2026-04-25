@@ -185,10 +185,23 @@ export function runMigrations(sqlite: SqliteDatabase): void {
       updated_at text not null default CURRENT_TIMESTAMP
     );
 
+    create table if not exists life_events (
+      id text primary key,
+      event_type text not null,
+      title text not null,
+      subtitle text,
+      occurred_at text not null,
+      metadata_json text not null,
+      created_at text not null default CURRENT_TIMESTAMP
+    );
+
     create index if not exists idx_todos_status_due
       on todos(status, due_on);
 
     create index if not exists idx_anniversaries_date
       on anniversaries(date);
+
+    create index if not exists idx_life_events_occurred_at
+      on life_events(occurred_at);
   `);
 }

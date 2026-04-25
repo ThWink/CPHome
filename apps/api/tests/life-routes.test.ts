@@ -435,7 +435,34 @@ describe("life routes", () => {
           recentExpense: {
             amountCents: 6200,
             note: "夜宵"
-          }
+          },
+          timeline: [
+            {
+              eventType: "meal_request",
+              title: "想吃请求",
+              subtitle: "番茄牛腩饭"
+            },
+            {
+              eventType: "water_reminder",
+              title: "提醒喝水",
+              subtitle: "drink water"
+            },
+            {
+              eventType: "expense",
+              title: "记了一笔账",
+              subtitle: "夜宵"
+            },
+            {
+              eventType: "parcel",
+              title: "新增快递",
+              subtitle: "B-2048"
+            },
+            {
+              eventType: "water",
+              title: "记录喝水",
+              subtitle: "250ml"
+            }
+          ]
         }
       });
     } finally {

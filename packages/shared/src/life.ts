@@ -15,6 +15,16 @@ export type TodoStatus = "open" | "done";
 export type AnniversaryRepeat = "none" | "yearly";
 export type CouplePerson = "self" | "partner";
 export type WaterReminderStatus = "pending" | "done";
+export type LifeEventType =
+  | "water"
+  | "water_reminder"
+  | "parcel"
+  | "expense"
+  | "todo"
+  | "anniversary"
+  | "meal"
+  | "meal_request"
+  | "meal_memory";
 
 export interface ExpenseInput {
   occurredOn: string;
@@ -149,6 +159,15 @@ export interface WaterTodaySummary {
   }>;
 }
 
+export interface LifeEvent {
+  id: string;
+  eventType: LifeEventType;
+  title: string;
+  subtitle: string | null;
+  occurredAt: string;
+  metadata: Record<string, unknown>;
+}
+
 export interface DashboardToday {
   date: string;
   weather: WeatherToday;
@@ -159,6 +178,7 @@ export interface DashboardToday {
   recentExpense: Expense | null;
   openTodos: Todo[];
   upcomingAnniversaries: UpcomingAnniversary[];
+  timeline: LifeEvent[];
 }
 
 const people: PersonTarget[] = ["self", "partner", "both"];
