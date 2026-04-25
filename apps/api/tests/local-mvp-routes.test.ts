@@ -152,4 +152,33 @@ describe("local MVP routes", () => {
       await app.close();
     }
   });
+
+  it("uses an injected LLM client for assistant replies", async () => {
+    const app = await buildApp({
+      databaseUrl: ":memory:",
+      llmClient: {
+        chat: async (messages) => {
+          expect(messages.map((message) => message.role)).toContain("user");
+          return "模型回复：今晚少吃辣，记得拿快递。";
+        }
+      }
+    });
+
+    try {
+      const response = await app.inject({
+        method: "POST",
+        url: "/api/assistant/chat",
+        payload: {
+          message: "今晚吃什么，今天有什么事？",
+          date: "2026-04-25"
+        }
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().reply).toBe("模型回复：今晚少吃辣，记得拿快递。");
+      expect(response.json().source).toBe("llm");
+    } finally {
+      await app.close();
+    }
+  });
 });

@@ -3,7 +3,10 @@
   <view class="subtitle">先做本地生活摘要，后续接入在线 API 和 Ollama</view>
 
   <view class="hero-panel">
-    <view class="label">小管家回复</view>
+    <view class="row">
+      <view class="label">小管家回复</view>
+      <view class="source-pill">{{sourceText}}</view>
+    </view>
     <view class="hero-note">{{reply}}</view>
   </view>
 

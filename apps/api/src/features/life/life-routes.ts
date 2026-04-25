@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { AppDatabase } from "../../db/client.js";
+import type { LlmClient, LlmMessage } from "../assistant/llm-client.js";
 import {
   createAnniversary,
   createExpense,
@@ -20,6 +21,7 @@ import {
 
 export interface LifeRouteOptions {
   database: AppDatabase;
+  llmClient?: LlmClient | null;
 }
 
 function getQueryDate(query: unknown): string {
@@ -64,6 +66,54 @@ function getBodyDate(body: unknown): string {
     : {};
 
   return normalizeLocalDate(record.date);
+}
+
+function getBodyMessage(body: unknown): string {
+  const record = typeof body === "object" && body !== null
+    ? body as Record<string, unknown>
+    : {};
+
+  if (typeof record.message !== "string" || record.message.trim().length === 0) {
+    throw new Error("message is required");
+  }
+
+  return record.message.trim();
+}
+
+function buildLocalAssistantReply(date: string, dashboard: ReturnType<typeof getDashboardToday>): string {
+  const summaryParts = [
+    `待取快递 ${dashboard.pendingParcels.length} 个`,
+    `待办 ${dashboard.openTodos.length} 个`,
+    `纪念日提醒 ${dashboard.upcomingAnniversaries.length} 个`,
+    `喝水记录 ${dashboard.water.people.reduce((sum, item) => sum + item.drinkCount, 0)} 次`
+  ];
+
+  return `${date} 今天有：${summaryParts.join("，")}`;
+}
+
+function buildAssistantMessages(
+  message: string,
+  dashboard: ReturnType<typeof getDashboardToday>
+): LlmMessage[] {
+  return [
+    {
+      role: "system",
+      content: [
+        "你是同居情侣生活助手，只根据用户自托管系统里的生活数据回答。",
+        "回答要简短、温柔、可执行，不要编造系统里没有的数据。",
+        "如果数据不足，直接说当前本地数据还不完整。"
+      ].join("\n")
+    },
+    {
+      role: "user",
+      content: [
+        message,
+        "",
+        "当前本地生活数据：",
+        JSON.stringify(dashboard)
+      ].join("\n")
+    }
+  ];
 }
 
 export async function registerLifeRoutes(
@@ -253,16 +303,25 @@ export async function registerLifeRoutes(
   app.post("/api/assistant/chat", async (request, reply) => {
     try {
       const date = getBodyDate(request.body);
+      const message = getBodyMessage(request.body);
       const dashboard = getDashboardToday(options.database, date);
-      const summaryParts = [
-        `待取快递 ${dashboard.pendingParcels.length} 个`,
-        `待办 ${dashboard.openTodos.length} 个`,
-        `纪念日提醒 ${dashboard.upcomingAnniversaries.length} 个`,
-        `喝水记录 ${dashboard.water.people.reduce((sum, item) => sum + item.drinkCount, 0)} 次`
-      ];
+
+      if (options.llmClient) {
+        try {
+          const modelReply = await options.llmClient.chat(buildAssistantMessages(message, dashboard));
+          return {
+            reply: modelReply,
+            source: "llm",
+            dashboard
+          };
+        } catch (error) {
+          request.log.warn({ error }, "LLM assistant reply failed, falling back to local summary");
+        }
+      }
 
       return {
-        reply: `${date} 今天有：${summaryParts.join("，")}`,
+        reply: buildLocalAssistantReply(date, dashboard),
+        source: "local",
         dashboard
       };
     } catch (error) {

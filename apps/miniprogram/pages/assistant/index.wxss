@@ -1,3 +1,11 @@
 .action-gap {
   margin-top: 22rpx;
 }
+
+.source-pill {
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: #e7f1e7;
+  color: #2f6f62;
+  font-size: 24rpx;
+}

@@ -12,6 +12,11 @@ services:
       PORT: 3000
       TZ: ${TZ:-Asia/Shanghai}
       DATABASE_URL: ${DATABASE_URL:-file:/data/app.db}
+      LLM_PROVIDER: ${LLM_PROVIDER:-disabled}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://127.0.0.1:11434}
     ports:
       - "${API_PORT:-3000}:3000"
     volumes:

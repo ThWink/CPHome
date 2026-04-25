@@ -17,6 +17,23 @@ pnpm typecheck
 pnpm dev:api
 ```
 
+The API defaults to local-only assistant summaries. To enable a model provider, configure:
+
+```bash
+LLM_PROVIDER=openai-compatible
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_API_KEY=your-key
+LLM_MODEL=gpt-4o-mini
+```
+
+For Ollama:
+
+```bash
+LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+LLM_MODEL=qwen2.5:7b
+```
+
 ## Deployment
 
 Copy `deploy/env.example` to `deploy/.env`, edit the values, then run:
