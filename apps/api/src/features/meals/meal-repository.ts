@@ -32,6 +32,12 @@ interface TastePreferenceRow {
   updated_at: string;
 }
 
+export interface ConfirmedMealMemory {
+  meal: MealRecord;
+  preferences: TastePreference[];
+  memoryText: string;
+}
+
 function mapMealRecord(row: MealRecordRow): MealRecord {
   return {
     id: row.id,
@@ -157,49 +163,94 @@ export function listTastePreferences(database: AppDatabase): TastePreference[] {
   return rows.map(mapTastePreference);
 }
 
-export function createMealMemory(database: AppDatabase, mealRecordId: string, content: string): string {
+function normalizeMemoryContent(content: unknown): string {
+  if (typeof content !== "string") {
+    throw new Error("memory content is required");
+  }
+
   const trimmedContent = content.trim();
   if (trimmedContent.length === 0) {
     throw new Error("memory content is required");
   }
 
+  return trimmedContent;
+}
+
+function insertMealMemory(database: AppDatabase, mealRecordId: string, content: string): string {
   const id = nanoid();
   const embeddingId = nanoid();
+
+  database.sqlite
+    .prepare("insert into meal_memory_entries (id, meal_record_id, content) values (?, ?, ?)")
+    .run(id, mealRecordId, content);
+
+  database.sqlite
+    .prepare(`
+      insert into memory_embeddings (
+        id,
+        memory_type,
+        source_table,
+        source_id,
+        content,
+        embedding_json,
+        metadata_json
+      ) values (?, ?, ?, ?, ?, ?, ?)
+    `)
+    .run(
+      embeddingId,
+      "meal",
+      "meal_records",
+      mealRecordId,
+      content,
+      "[]",
+      JSON.stringify({ mealRecordId })
+    );
+
+  return id;
+}
+
+export function createMealMemory(database: AppDatabase, mealRecordId: string, content: unknown): string {
+  const trimmedContent = normalizeMemoryContent(content);
 
   database.sqlite.exec("begin");
 
   try {
-    database.sqlite
-      .prepare("insert into meal_memory_entries (id, meal_record_id, content) values (?, ?, ?)")
-      .run(id, mealRecordId, trimmedContent);
-
-    database.sqlite
-      .prepare(`
-        insert into memory_embeddings (
-          id,
-          memory_type,
-          source_table,
-          source_id,
-          content,
-          embedding_json,
-          metadata_json
-        ) values (?, ?, ?, ?, ?, ?, ?)
-      `)
-      .run(
-        embeddingId,
-        "meal",
-        "meal_records",
-        mealRecordId,
-        trimmedContent,
-        "[]",
-        JSON.stringify({ mealRecordId })
-      );
-
+    const id = insertMealMemory(database, mealRecordId, trimmedContent);
     database.sqlite.exec("commit");
+    return id;
   } catch (error) {
     database.sqlite.exec("rollback");
     throw error;
   }
+}
 
-  return id;
+export function saveConfirmedMealMemory(
+  database: AppDatabase,
+  mealRecordInput: unknown,
+  preferenceInputs: unknown[],
+  memoryText: unknown
+): ConfirmedMealMemory {
+  const normalizedMemoryText = normalizeMemoryContent(memoryText);
+
+  database.sqlite.exec("begin");
+
+  try {
+    const meal = createMealRecord(database, mealRecordInput);
+    const preferences = preferenceInputs.map((preferenceInput) =>
+      upsertTastePreference(database, preferenceInput)
+    );
+
+    insertMealMemory(database, meal.id, normalizedMemoryText);
+
+    database.sqlite.exec("commit");
+
+    return {
+      meal,
+      preferences,
+      memoryText: normalizedMemoryText
+    };
+  } catch (error) {
+    database.sqlite.exec("rollback");
+    throw error;
+  }
 }

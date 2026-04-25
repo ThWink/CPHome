@@ -46,4 +46,33 @@ describe("recommendMeals", () => {
       database.sqlite.close();
     }
   });
+
+  it("does not penalize meals outside the recent day window", () => {
+    const database = openDatabase(":memory:");
+
+    try {
+      runMigrations(database.sqlite);
+
+      createMealRecord(database, {
+        occurredOn: "2000-01-01",
+        mealKind: "takeout",
+        person: "both",
+        vendorName: "常点麻辣烫",
+        items: ["麻辣烫"],
+        amountCents: 4500,
+        rating: 4,
+        note: "很久以前吃过"
+      });
+
+      const result = recommendMeals(database, {
+        weather: "cold",
+        budget: "normal",
+        maxRecentDays: 3
+      });
+
+      expect(result.recommendations.find((item) => item.slot === "favorite")?.title).toBe("麻辣烫");
+    } finally {
+      database.sqlite.close();
+    }
+  });
 });

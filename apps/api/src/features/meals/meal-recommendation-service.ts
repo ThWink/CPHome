@@ -117,8 +117,33 @@ function budgetScore(candidate: Candidate, request: RecommendationRequest): numb
   return 0;
 }
 
+function todayIsoDateInShanghai(): string {
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+  const partMap = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return `${partMap.year}-${partMap.month}-${partMap.day}`;
+}
+
+function isoDateToDayNumber(date: string): number {
+  const [year, month, day] = date.split("-").map(Number);
+  return Math.floor(Date.UTC(year!, month! - 1, day!) / 86_400_000);
+}
+
+function isWithinRecentDays(occurredOn: string, maxRecentDays: number): boolean {
+  const today = isoDateToDayNumber(todayIsoDateInShanghai());
+  const occurred = isoDateToDayNumber(occurredOn);
+
+  return occurred >= today - maxRecentDays;
+}
+
 function scoreCandidates(database: AppDatabase, request: RecommendationRequest): ScoredCandidate[] {
-  const recentMeals = listRecentMealRecords(database, 20);
+  const recentMeals = listRecentMealRecords(database, 50)
+    .filter((meal) => isWithinRecentDays(meal.occurredOn, request.maxRecentDays));
   const preferences = listTastePreferences(database);
 
   return candidates
@@ -133,7 +158,7 @@ function scoreCandidates(database: AppDatabase, request: RecommendationRequest):
         }
       }
 
-      for (const meal of recentMeals.slice(0, request.maxRecentDays)) {
+      for (const meal of recentMeals) {
         const matchedMeal =
           matchesCandidate(candidate, meal.vendorName) ||
           meal.items.some((item) => matchesCandidate(candidate, item));

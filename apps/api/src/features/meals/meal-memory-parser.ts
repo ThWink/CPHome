@@ -11,12 +11,24 @@ interface MealMemoryInput {
 }
 
 const personTargets: PersonTarget[] = ["self", "partner", "both"];
+const maxSharedTextLength = 80;
 
 function todayIsoDate(): string {
-  const now = new Date();
-  const month = `${now.getMonth() + 1}`.padStart(2, "0");
-  const day = `${now.getDate()}`.padStart(2, "0");
-  return `${now.getFullYear()}-${month}-${day}`;
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+  const partMap = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return `${partMap.year}-${partMap.month}-${partMap.day}`;
+}
+
+function limitSharedText(value: string): string {
+  return value.length <= maxSharedTextLength
+    ? value
+    : value.slice(0, maxSharedTextLength);
 }
 
 function normalizeText(input: MealMemoryInput): string {
@@ -88,7 +100,7 @@ function extractDish(text: string): string {
     .replace(/^(今天|中午|晚上|晚饭|午饭|早饭)/, "")
     .trim();
 
-  return rawDish.length > 0 ? rawDish : "外卖";
+  return rawDish.length > 0 ? limitSharedText(rawDish) : "外卖";
 }
 
 function extractNote(text: string): string | null {
@@ -99,7 +111,7 @@ function extractNote(text: string): string | null {
     .join("，")
     .trim();
 
-  return note.length > 0 ? note : null;
+  return note.length > 0 ? limitSharedText(note) : null;
 }
 
 function inferRating(text: string): number | null {
@@ -144,7 +156,7 @@ function buildPreferenceUpdates(
       value: dish,
       sentiment: "like",
       weight: 30,
-      note: `来自饮食记录：${note ?? "正向评价"}`
+      note: limitSharedText(`来自饮食记录：${note ?? "正向评价"}`)
     });
   }
 

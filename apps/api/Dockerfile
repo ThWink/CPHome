@@ -23,6 +23,7 @@ FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV="production"
 ENV HOST="0.0.0.0"
 ENV PORT="3000"
+ENV TZ="Asia/Shanghai"
 ENV DATABASE_URL="file:/data/app.db"
 WORKDIR /app
 RUN corepack enable

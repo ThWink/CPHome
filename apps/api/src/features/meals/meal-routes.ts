@@ -3,11 +3,10 @@ import type { AppDatabase } from "../../db/client.js";
 import { parseMealMemoryText } from "./meal-memory-parser.js";
 import { recommendMeals } from "./meal-recommendation-service.js";
 import {
-  createMealMemory,
   createMealRecord,
   listRecentMealRecords,
   listTastePreferences,
-  upsertTastePreference
+  saveConfirmedMealMemory
 } from "./meal-repository.js";
 
 export interface MealRouteOptions {
@@ -93,18 +92,14 @@ export async function registerMealRoutes(
   app.post("/api/meals/memory/confirm", async (request, reply) => {
     try {
       const parsed = normalizeConfirmPayload(request.body);
-      const meal = createMealRecord(options.database, parsed.mealRecord);
-      const preferences = parsed.preferenceUpdates.map((preference) =>
-        upsertTastePreference(options.database, preference)
+      const result = saveConfirmedMealMemory(
+        options.database,
+        parsed.mealRecord,
+        parsed.preferenceUpdates,
+        parsed.memoryText
       );
 
-      createMealMemory(options.database, meal.id, parsed.memoryText);
-
-      return reply.code(201).send({
-        meal,
-        preferences,
-        memoryText: parsed.memoryText
-      });
+      return reply.code(201).send(result);
     } catch (error) {
       if (error instanceof Error) {
         return reply.code(400).send({
