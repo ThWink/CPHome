@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { AppDatabase } from "../../db/client.js";
 import type { LlmClient, LlmMessage } from "../assistant/llm-client.js";
+import type { WeatherClient } from "../weather/weather-client.js";
 import {
   createAnniversary,
   createExpense,
@@ -24,6 +25,7 @@ import {
 export interface LifeRouteOptions {
   database: AppDatabase;
   llmClient?: LlmClient | null;
+  weatherClient?: WeatherClient | null;
 }
 
 function getQueryDate(query: unknown): string {
@@ -130,9 +132,23 @@ export async function registerLifeRoutes(
   app: FastifyInstance,
   options: LifeRouteOptions
 ): Promise<void> {
-  app.get("/api/weather/today", async (request) => ({
-    weather: getWeatherToday(getQueryString(request.query, "city"))
-  }));
+  app.get("/api/weather/today", async (request) => {
+    const city = getQueryString(request.query, "city");
+
+    if (options.weatherClient) {
+      try {
+        return {
+          weather: await options.weatherClient.getToday(city)
+        };
+      } catch (error) {
+        request.log.warn({ error }, "online weather failed, falling back to local weather");
+      }
+    }
+
+    return {
+      weather: getWeatherToday(city)
+    };
+  });
 
   app.post("/api/water/drinks", async (request, reply) => {
     try {

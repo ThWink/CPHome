@@ -2,9 +2,13 @@
   <view class="title">天气</view>
   <view class="subtitle">给今天的外卖、出门和取快递一点参考</view>
 
-  <view class="hero-panel">
-    <view class="label">今日天气</view>
+  <view class="hero-panel weather-panel">
+    <view class="row">
+      <view class="label">今日天气</view>
+      <view class="source-pill">{{sourceText}}</view>
+    </view>
     <view class="hero-title">{{weatherText}}</view>
+    <view wx:if="{{updatedText}}" class="weather-meta">更新于 {{updatedText}}</view>
     <view class="hero-note">{{advice}}</view>
   </view>
 

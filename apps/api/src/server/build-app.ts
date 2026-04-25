@@ -7,6 +7,7 @@ import { createLlmClient, type LlmClient } from "../features/assistant/llm-clien
 import { registerLifeRoutes } from "../features/life/life-routes.js";
 import { registerMealRoutes } from "../features/meals/meal-routes.js";
 import { registerSetupRoutes } from "../features/setup/setup-routes.js";
+import { createWeatherClient, type WeatherClient } from "../features/weather/weather-client.js";
 import { registerAuthHook } from "./auth.js";
 import { registerHealthRoutes } from "./health-routes.js";
 
@@ -16,6 +17,7 @@ export interface BuildAppOptions {
   databaseUrl?: string;
   apiToken?: string | null;
   llmClient?: LlmClient | null;
+  weatherClient?: WeatherClient | null;
   logger?: boolean;
   runDatabaseMigrations?: boolean;
 }
@@ -46,9 +48,16 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await registerHealthRoutes(app, { database });
   await registerSetupRoutes(app, { database });
   await registerMealRoutes(app, { database });
+  const weatherClient = options.weatherClient === undefined
+    ? env.NODE_ENV === "test"
+      ? null
+      : createWeatherClient(env)
+    : options.weatherClient;
+
   await registerLifeRoutes(app, {
     database,
-    llmClient: options.llmClient ?? createLlmClient(env)
+    llmClient: options.llmClient ?? createLlmClient(env),
+    weatherClient
   });
 
   return app;

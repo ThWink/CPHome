@@ -25,6 +25,14 @@ interface DashboardResponse {
   };
 }
 
+interface WeatherResponse {
+  weather?: {
+    city?: unknown;
+    condition?: unknown;
+    temperatureC?: unknown;
+  };
+}
+
 interface RecommendationsResponse {
   recommendations?: unknown[];
   rouletteCandidates?: unknown[];
@@ -168,6 +176,24 @@ export async function runLocalAcceptance(
       Array.isArray(dashboard.upcomingAnniversaries)
       ? pass("dashboard", "home dashboard data is available")
       : fail("dashboard", `dashboard data is incomplete, got HTTP ${response.status}`);
+  })) {
+    return finish(checks);
+  }
+
+  if (!await appendCheck(checks, async () => {
+    const response = await readJson<WeatherResponse>(
+      "/api/weather/today?city=%E5%8D%97%E6%98%8C",
+      options
+    );
+    const weather = response.body.weather;
+
+    return response.status === 200 &&
+      weather !== undefined &&
+      typeof weather.city === "string" &&
+      typeof weather.condition === "string" &&
+      typeof weather.temperatureC === "number"
+      ? pass("weather", "weather data is available")
+      : fail("weather", `weather failed, got HTTP ${response.status}`);
   })) {
     return finish(checks);
   }

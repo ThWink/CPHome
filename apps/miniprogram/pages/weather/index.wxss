@@ -1,3 +1,24 @@
 .action-gap {
   margin-top: 22rpx;
 }
+
+.weather-panel {
+  background: linear-gradient(135deg, #fffaf5 0%, #eef6ed 100%);
+}
+
+.source-pill {
+  min-height: 44rpx;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  background: #eaf4e7;
+  color: #2f6f62;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 44rpx;
+}
+
+.weather-meta {
+  margin-top: 10rpx;
+  color: #8a7663;
+  font-size: 24rpx;
+}

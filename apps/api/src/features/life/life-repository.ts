@@ -220,7 +220,8 @@ export function getWeatherToday(cityInput: unknown): WeatherToday {
     condition: "多云",
     temperatureC: 24,
     advice: "适合点一份热乎但不油腻的外卖，出门取快递记得带伞。",
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    source: "local"
   };
 }
 

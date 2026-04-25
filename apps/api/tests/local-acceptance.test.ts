@@ -37,6 +37,16 @@ describe("local acceptance verifier", () => {
         });
       }
 
+      if (url.includes("/api/weather/today")) {
+        return jsonResponse({
+          weather: {
+            city: "南昌",
+            condition: "晴",
+            temperatureC: 26
+          }
+        });
+      }
+
       if (url.endsWith("/api/meals/recommendations")) {
         return jsonResponse({
           recommendations: [{ title: "番茄牛腩饭" }, { title: "砂锅粥" }, { title: "小碗菜" }],
@@ -78,6 +88,7 @@ describe("local acceptance verifier", () => {
       "health",
       "setup",
       "dashboard",
+      "weather",
       "meal recommendations",
       "meal memories",
       "expense summary",

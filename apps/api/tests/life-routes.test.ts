@@ -2,6 +2,44 @@ import { describe, expect, it } from "vitest";
 import { buildApp } from "../src/server/build-app.js";
 
 describe("life routes", () => {
+  it("returns online weather from the configured weather client", async () => {
+    const app = await buildApp({
+      databaseUrl: ":memory:",
+      weatherClient: {
+        async getToday(city) {
+          expect(city).toBe("Nanchang");
+          return {
+            city: "Nanchang",
+            condition: "Sunny",
+            temperatureC: 26,
+            advice: "Good for a short walk.",
+            updatedAt: "2026-04-25T10:00:00.000Z"
+          };
+        }
+      }
+    });
+
+    try {
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/weather/today?city=Nanchang"
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual({
+        weather: {
+          city: "Nanchang",
+          condition: "Sunny",
+          temperatureC: 26,
+          advice: "Good for a short walk.",
+          updatedAt: "2026-04-25T10:00:00.000Z"
+        }
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
   it("records water drinks and returns today's summary", async () => {
     const app = await buildApp({ databaseUrl: ":memory:" });
 

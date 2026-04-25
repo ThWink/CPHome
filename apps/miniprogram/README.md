@@ -43,7 +43,7 @@ Current local MVP pages:
 - Home: backend status, binding status, dashboard cards.
 - Setup: initialize the one-couple deployment.
 - Meals: takeout recommendations, roulette, and meal memory confirmation.
-- Weather: local weather advice for takeout and errands.
+- Weather: online weather with local fallback advice for takeout and errands.
 - Water: record today's drink counts for both people.
 - Parcels: publish pending parcels and mark them picked.
 - Expenses: record categorized shared expenses with payer selection and monthly summary.

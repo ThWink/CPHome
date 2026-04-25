@@ -117,6 +117,7 @@ export interface WeatherToday {
   temperatureC: number;
   advice: string;
   updatedAt: string;
+  source?: "online" | "local";
 }
 
 export interface WaterTodaySummary {
