@@ -355,6 +355,78 @@ export function listMealMemories(database: AppDatabase, limit: number): MealMemo
   return rows.map(mapMealMemory);
 }
 
+function getMealMemoryById(database: AppDatabase, id: string): MealMemorySummary | null {
+  const row = database.sqlite
+    .prepare(`
+      select
+        meal_memory_entries.id,
+        meal_memory_entries.content,
+        meal_memory_entries.created_at,
+        meal_records.id as meal_id,
+        meal_records.occurred_on,
+        meal_records.meal_kind,
+        meal_records.person,
+        meal_records.vendor_name,
+        meal_records.items_json,
+        meal_records.amount_cents,
+        meal_records.rating,
+        meal_records.note,
+        meal_records.created_at as meal_created_at
+      from meal_memory_entries
+      join meal_records on meal_records.id = meal_memory_entries.meal_record_id
+      where meal_memory_entries.id = ?
+    `)
+    .get(id) as MealMemoryRow | undefined;
+
+  return row ? mapMealMemory(row) : null;
+}
+
+export function updateMealMemory(database: AppDatabase, id: string, content: unknown): MealMemorySummary {
+  const trimmedContent = normalizeMemoryContent(content);
+  const existing = database.sqlite
+    .prepare("select meal_record_id from meal_memory_entries where id = ?")
+    .get(id) as { meal_record_id: string } | undefined;
+
+  if (!existing) {
+    throw new Error("meal memory not found");
+  }
+
+  database.sqlite.exec("begin");
+
+  try {
+    database.sqlite
+      .prepare("update meal_memory_entries set content = ? where id = ?")
+      .run(trimmedContent, id);
+    database.sqlite
+      .prepare(`
+        update memory_embeddings
+        set content = ?, updated_at = CURRENT_TIMESTAMP
+        where source_table = ? and source_id = ?
+      `)
+      .run(trimmedContent, "meal_records", existing.meal_record_id);
+    appendLifeEvent(database, {
+      eventType: "meal_memory",
+      title: "更新饮食记忆",
+      subtitle: trimmedContent,
+      metadata: {
+        memoryId: id,
+        mealRecordId: existing.meal_record_id
+      }
+    });
+    database.sqlite.exec("commit");
+  } catch (error) {
+    database.sqlite.exec("rollback");
+    throw error;
+  }
+
+  const memory = getMealMemoryById(database, id);
+  if (!memory) {
+    throw new Error("meal memory not found");
+  }
+
+  return memory;
+}
+
 export function deleteMealMemory(database: AppDatabase, id: string): boolean {
   const existing = database.sqlite
     .prepare("select meal_record_id from meal_memory_entries where id = ?")

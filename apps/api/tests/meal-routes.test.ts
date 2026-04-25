@@ -225,6 +225,73 @@ describe("meal routes", () => {
     }
   });
 
+  it("updates confirmed meal memory text and local vector content", async () => {
+    const app = await buildApp({ databaseUrl: ":memory:" });
+
+    try {
+      const confirmResponse = await app.inject({
+        method: "POST",
+        url: "/api/meals/memory/confirm",
+        payload: {
+          mealRecord: {
+            occurredOn: "2026-04-25",
+            mealKind: "takeout",
+            person: "both",
+            vendorName: "砂锅粥铺",
+            items: ["皮蛋瘦肉粥"],
+            amountCents: 3600,
+            rating: 5,
+            note: "清淡热乎"
+          },
+          preferenceUpdates: [],
+          memoryText: "她想吃清淡热乎的时候，砂锅粥铺是稳定选择。"
+        }
+      });
+      expect(confirmResponse.statusCode).toBe(201);
+
+      const listResponse = await app.inject({
+        method: "GET",
+        url: "/api/meals/memories"
+      });
+      const memoryId = listResponse.json().memories[0].id;
+
+      const updateResponse = await app.inject({
+        method: "PATCH",
+        url: `/api/meals/memories/${memoryId}`,
+        payload: {
+          content: "她晚上想吃清淡热乎的时候，砂锅粥铺优先推荐。"
+        }
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+      expect(updateResponse.json()).toMatchObject({
+        memory: {
+          id: memoryId,
+          content: "她晚上想吃清淡热乎的时候，砂锅粥铺优先推荐。"
+        }
+      });
+
+      const nextListResponse = await app.inject({
+        method: "GET",
+        url: "/api/meals/memories"
+      });
+      expect(nextListResponse.json().memories[0]).toMatchObject({
+        id: memoryId,
+        content: "她晚上想吃清淡热乎的时候，砂锅粥铺优先推荐。"
+      });
+
+      const backupResponse = await app.inject({
+        method: "GET",
+        url: "/api/backup/export"
+      });
+      expect(backupResponse.json().backup.tables.memory_embeddings[0]).toMatchObject({
+        content: "她晚上想吃清淡热乎的时候，砂锅粥铺优先推荐。"
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
   it("does not persist partial data when memory confirmation is invalid", async () => {
     const app = await buildApp({ databaseUrl: ":memory:" });
 

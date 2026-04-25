@@ -11,6 +11,7 @@ import {
   listRecentMealRecords,
   listTastePreferences,
   saveConfirmedMealMemory,
+  updateMealMemory,
   updateMealRequestStatus
 } from "./meal-repository.js";
 
@@ -28,6 +29,27 @@ interface NormalizedConfirmMealMemoryPayload {
   mealRecord: unknown;
   preferenceUpdates: unknown[];
   memoryText: string;
+}
+
+function getRouteId(params: unknown, errorName: string): string {
+  const record = typeof params === "object" && params !== null
+    ? params as { id?: unknown }
+    : {};
+  const id = typeof record.id === "string" ? record.id.trim() : "";
+
+  if (!id) {
+    throw new Error(errorName);
+  }
+
+  return id;
+}
+
+function getMemoryContent(body: unknown): unknown {
+  const record = typeof body === "object" && body !== null
+    ? body as { content?: unknown }
+    : {};
+
+  return record.content;
 }
 
 function normalizeConfirmPayload(input: unknown): NormalizedConfirmMealMemoryPayload {
@@ -130,11 +152,28 @@ export async function registerMealRoutes(
     memories: listMealMemories(options.database, 50)
   }));
 
-  app.delete("/api/meals/memories/:id", async (request, reply) => {
-    const params = request.params as { id?: string };
-    const id = params.id?.trim();
+  app.patch("/api/meals/memories/:id", async (request, reply) => {
+    try {
+      const id = getRouteId(request.params, "meal memory id is required");
+      const memory = updateMealMemory(options.database, id, getMemoryContent(request.body));
+      return { memory };
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.code(error.message === "meal memory not found" ? 404 : 400).send({
+          error: error.message === "meal memory not found" ? "MEMORY_NOT_FOUND" : "INVALID_MEMORY_CONTENT",
+          message: error.message
+        });
+      }
 
-    if (!id) {
+      throw error;
+    }
+  });
+
+  app.delete("/api/meals/memories/:id", async (request, reply) => {
+    let id = "";
+    try {
+      id = getRouteId(request.params, "meal memory id is required");
+    } catch {
       return reply.code(400).send({
         error: "INVALID_MEMORY_ID",
         message: "memory id is required"

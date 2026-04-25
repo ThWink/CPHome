@@ -49,9 +49,24 @@
         <view class="memory-main">
           <view class="label">{{item.meal.occurredOn}}</view>
           <view class="value">{{item.itemText}}</view>
-          <view class="subtitle">{{item.content}}</view>
+          <view wx:if="{{editingMemoryId !== item.id}}" class="subtitle">{{item.content}}</view>
+          <textarea
+            wx:else
+            class="memory-editor"
+            value="{{editingMemoryText}}"
+            bindinput="onMemoryEditInput"
+            maxlength="300"
+            auto-height
+          />
         </view>
-        <button class="button secondary compact-button" data-id="{{item.id}}" bindtap="deleteMemory">删除</button>
+        <view wx:if="{{editingMemoryId === item.id}}" class="memory-actions">
+          <button class="button compact-button" bindtap="saveMemory">保存</button>
+          <button class="button secondary compact-button" bindtap="cancelEditMemory">取消</button>
+        </view>
+        <view wx:else class="memory-actions">
+          <button class="button secondary compact-button" data-id="{{item.id}}" data-content="{{item.content}}" bindtap="startEditMemory">编辑</button>
+          <button class="button secondary compact-button" data-id="{{item.id}}" bindtap="deleteMemory">删除</button>
+        </view>
       </view>
     </view>
   </view>

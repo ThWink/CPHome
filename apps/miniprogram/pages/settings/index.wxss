@@ -26,6 +26,27 @@
   flex: 1;
 }
 
+.memory-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.memory-editor {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 132rpx;
+  margin-top: 12rpx;
+  padding: 18rpx;
+  border: 1rpx solid #e4d6c6;
+  border-radius: 12rpx;
+  background: #fffdf8;
+  color: #2b2520;
+  font-size: 26rpx;
+  line-height: 1.5;
+}
+
 .preference-row {
   display: flex;
   align-items: center;

@@ -43,6 +43,10 @@ interface PreferencesResponse {
   preferences: TastePreference[];
 }
 
+interface MemoryUpdateResponse {
+  memory: MealMemory;
+}
+
 interface BackupExportResponse {
   backup: {
     version: number;
@@ -65,6 +69,8 @@ Page({
     healthText: "未检查",
     memoryText: "未加载",
     backupText: "还没有生成备份",
+    editingMemoryId: "",
+    editingMemoryText: "",
     memories: [] as Array<MealMemory & { itemText: string }>,
     preferences: [] as Array<TastePreference & { sentimentText: string }>
   },
@@ -151,6 +157,59 @@ Page({
     }
 
     wx.showToast({ title: "已删除", icon: "success" });
+    void this.loadMemoryData();
+  },
+
+  startEditMemory(event: { currentTarget: { dataset: { id?: string; content?: string } } }) {
+    const id = event.currentTarget.dataset.id;
+    if (!id) {
+      return;
+    }
+
+    this.setData({
+      editingMemoryId: id,
+      editingMemoryText: event.currentTarget.dataset.content ?? ""
+    });
+  },
+
+  onMemoryEditInput(event: { detail: { value: string } }) {
+    this.setData({
+      editingMemoryText: event.detail.value
+    });
+  },
+
+  cancelEditMemory() {
+    this.setData({
+      editingMemoryId: "",
+      editingMemoryText: ""
+    });
+  },
+
+  async saveMemory() {
+    const id = `${this.data.editingMemoryId ?? ""}`.trim();
+    const content = `${this.data.editingMemoryText ?? ""}`.trim();
+    if (!id || content.length === 0) {
+      wx.showToast({ title: "内容不能为空", icon: "none" });
+      return;
+    }
+
+    const response = await requestApi<MemoryUpdateResponse>(`/api/meals/memories/${id}`, {
+      method: "PATCH",
+      data: {
+        content
+      }
+    });
+
+    if (!response.ok) {
+      wx.showToast({ title: response.statusCode === 401 ? "Token 不正确" : "保存失败", icon: "none" });
+      return;
+    }
+
+    this.setData({
+      editingMemoryId: "",
+      editingMemoryText: ""
+    });
+    wx.showToast({ title: "已保存", icon: "success" });
     void this.loadMemoryData();
   },
 
