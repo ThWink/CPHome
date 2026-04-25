@@ -42,3 +42,4 @@ Current local MVP pages:
 - Todos: create and complete shared daily tasks.
 - Anniversaries: track upcoming important dates.
 - Assistant: ask the local life assistant, with optional LLM provider support from the API.
+- Settings: API address, health check, AI memory and taste preference management.

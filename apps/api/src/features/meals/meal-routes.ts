@@ -4,6 +4,8 @@ import { parseMealMemoryText } from "./meal-memory-parser.js";
 import { recommendMeals } from "./meal-recommendation-service.js";
 import {
   createMealRecord,
+  deleteMealMemory,
+  listMealMemories,
   listRecentMealRecords,
   listTastePreferences,
   saveConfirmedMealMemory
@@ -73,6 +75,32 @@ export async function registerMealRoutes(
   app.get("/api/meals/preferences", async () => ({
     preferences: listTastePreferences(options.database)
   }));
+
+  app.get("/api/meals/memories", async () => ({
+    memories: listMealMemories(options.database, 50)
+  }));
+
+  app.delete("/api/meals/memories/:id", async (request, reply) => {
+    const params = request.params as { id?: string };
+    const id = params.id?.trim();
+
+    if (!id) {
+      return reply.code(400).send({
+        error: "INVALID_MEMORY_ID",
+        message: "memory id is required"
+      });
+    }
+
+    const deleted = deleteMealMemory(options.database, id);
+    if (!deleted) {
+      return reply.code(404).send({
+        error: "MEMORY_NOT_FOUND",
+        message: "meal memory not found"
+      });
+    }
+
+    return reply.code(204).send();
+  });
 
   app.post("/api/meals/memory/parse", async (request, reply) => {
     try {

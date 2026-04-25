@@ -1,3 +1,51 @@
 .action-gap {
   margin-top: 20rpx;
 }
+
+.compact-button {
+  min-width: 112rpx;
+  height: 60rpx;
+  padding: 0 18rpx;
+  font-size: 24rpx;
+  line-height: 60rpx;
+}
+
+.memory-card {
+  margin-top: 18rpx;
+}
+
+.memory-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.preference-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #efe4d8;
+}
+
+.preference-row:last-child {
+  border-bottom: 0;
+}
+
+.preference-title {
+  color: #2b2520;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.preference-pill {
+  min-width: 96rpx;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: #eef5ed;
+  color: #2f6f62;
+  font-size: 24rpx;
+  text-align: center;
+  white-space: nowrap;
+}

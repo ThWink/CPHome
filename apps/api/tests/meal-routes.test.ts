@@ -86,6 +86,81 @@ describe("meal routes", () => {
     }
   });
 
+  it("lists and deletes confirmed meal memories", async () => {
+    const app = await buildApp({ databaseUrl: ":memory:" });
+
+    try {
+      const confirmResponse = await app.inject({
+        method: "POST",
+        url: "/api/meals/memory/confirm",
+        payload: {
+          mealRecord: {
+            occurredOn: "2026-04-25",
+            mealKind: "takeout",
+            person: "both",
+            vendorName: "砂锅粥铺",
+            items: ["皮蛋瘦肉粥"],
+            amountCents: 3600,
+            rating: 5,
+            note: "清淡热乎"
+          },
+          preferenceUpdates: [
+            {
+              person: "partner",
+              category: "dish",
+              value: "砂锅粥",
+              sentiment: "like",
+              weight: 50,
+              note: "清淡晚餐备用"
+            }
+          ],
+          memoryText: "她想吃清淡热乎的时候，砂锅粥铺是稳定选择。"
+        }
+      });
+      expect(confirmResponse.statusCode).toBe(201);
+
+      const listResponse = await app.inject({
+        method: "GET",
+        url: "/api/meals/memories"
+      });
+
+      expect(listResponse.statusCode).toBe(200);
+      expect(listResponse.json()).toMatchObject({
+        memories: [
+          {
+            id: expect.any(String),
+            content: "她想吃清淡热乎的时候，砂锅粥铺是稳定选择。",
+            meal: {
+              vendorName: "砂锅粥铺",
+              items: ["皮蛋瘦肉粥"]
+            }
+          }
+        ]
+      });
+
+      const memoryId = listResponse.json().memories[0].id;
+      const deleteResponse = await app.inject({
+        method: "DELETE",
+        url: `/api/meals/memories/${memoryId}`
+      });
+      expect(deleteResponse.statusCode).toBe(204);
+
+      const nextListResponse = await app.inject({
+        method: "GET",
+        url: "/api/meals/memories"
+      });
+      const recentMealsResponse = await app.inject({
+        method: "GET",
+        url: "/api/meals/recent"
+      });
+
+      expect(nextListResponse.json()).toEqual({ memories: [] });
+      expect(recentMealsResponse.json().meals).toHaveLength(1);
+    } finally {
+      await app.close();
+    }
+  });
+
   it("does not persist partial data when memory confirmation is invalid", async () => {
     const app = await buildApp({ databaseUrl: ":memory:" });
 

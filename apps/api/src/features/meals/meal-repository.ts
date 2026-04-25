@@ -38,6 +38,29 @@ export interface ConfirmedMealMemory {
   memoryText: string;
 }
 
+interface MealMemoryRow {
+  id: string;
+  content: string;
+  created_at: string;
+  meal_id: string;
+  occurred_on: string;
+  meal_kind: MealRecord["mealKind"];
+  person: MealRecord["person"];
+  vendor_name: string;
+  items_json: string;
+  amount_cents: number | null;
+  rating: number | null;
+  note: string | null;
+  meal_created_at: string;
+}
+
+export interface MealMemorySummary {
+  id: string;
+  content: string;
+  createdAt: string;
+  meal: MealRecord;
+}
+
 function mapMealRecord(row: MealRecordRow): MealRecord {
   return {
     id: row.id,
@@ -64,6 +87,26 @@ function mapTastePreference(row: TastePreferenceRow): TastePreference {
     note: row.note,
     createdAt: row.created_at,
     updatedAt: row.updated_at
+  };
+}
+
+function mapMealMemory(row: MealMemoryRow): MealMemorySummary {
+  return {
+    id: row.id,
+    content: row.content,
+    createdAt: row.created_at,
+    meal: mapMealRecord({
+      id: row.meal_id,
+      occurred_on: row.occurred_on,
+      meal_kind: row.meal_kind,
+      person: row.person,
+      vendor_name: row.vendor_name,
+      items_json: row.items_json,
+      amount_cents: row.amount_cents,
+      rating: row.rating,
+      note: row.note,
+      created_at: row.meal_created_at
+    })
   };
 }
 
@@ -161,6 +204,59 @@ export function listTastePreferences(database: AppDatabase): TastePreference[] {
     .all() as TastePreferenceRow[];
 
   return rows.map(mapTastePreference);
+}
+
+export function listMealMemories(database: AppDatabase, limit: number): MealMemorySummary[] {
+  const safeLimit = Number.isInteger(limit) && limit > 0 ? limit : 20;
+  const rows = database.sqlite
+    .prepare(`
+      select
+        meal_memory_entries.id,
+        meal_memory_entries.content,
+        meal_memory_entries.created_at,
+        meal_records.id as meal_id,
+        meal_records.occurred_on,
+        meal_records.meal_kind,
+        meal_records.person,
+        meal_records.vendor_name,
+        meal_records.items_json,
+        meal_records.amount_cents,
+        meal_records.rating,
+        meal_records.note,
+        meal_records.created_at as meal_created_at
+      from meal_memory_entries
+      join meal_records on meal_records.id = meal_memory_entries.meal_record_id
+      order by meal_memory_entries.created_at desc
+      limit ?
+    `)
+    .all(safeLimit) as MealMemoryRow[];
+
+  return rows.map(mapMealMemory);
+}
+
+export function deleteMealMemory(database: AppDatabase, id: string): boolean {
+  const existing = database.sqlite
+    .prepare("select meal_record_id from meal_memory_entries where id = ?")
+    .get(id) as { meal_record_id: string } | undefined;
+
+  if (!existing) {
+    return false;
+  }
+
+  database.sqlite.exec("begin");
+
+  try {
+    database.sqlite
+      .prepare("delete from memory_embeddings where source_table = ? and source_id = ?")
+      .run("meal_records", existing.meal_record_id);
+    database.sqlite.prepare("delete from meal_memory_entries where id = ?").run(id);
+    database.sqlite.exec("commit");
+  } catch (error) {
+    database.sqlite.exec("rollback");
+    throw error;
+  }
+
+  return true;
 }
 
 function normalizeMemoryContent(content: unknown): string {

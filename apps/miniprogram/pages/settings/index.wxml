@@ -13,4 +13,44 @@
     <view class="value">{{healthText}}</view>
     <button class="button secondary action-gap" bindtap="checkHealth">检查后端</button>
   </view>
+
+  <view class="section">
+    <view class="row">
+      <view>
+        <view class="label">AI 记忆</view>
+        <view class="value">{{memoryText}}</view>
+      </view>
+      <button class="button secondary compact-button" bindtap="loadMemoryData">刷新</button>
+    </view>
+  </view>
+
+  <view class="section">
+    <view wx:if="{{memories.length === 0}}" class="panel">
+      <view class="label">饮食记忆</view>
+      <view class="subtitle">还没有保存过饮食记忆</view>
+    </view>
+
+    <view wx:for="{{memories}}" wx:key="id" class="panel memory-card">
+      <view class="row">
+        <view class="memory-main">
+          <view class="label">{{item.meal.occurredOn}}</view>
+          <view class="value">{{item.itemText}}</view>
+          <view class="subtitle">{{item.content}}</view>
+        </view>
+        <button class="button secondary compact-button" data-id="{{item.id}}" bindtap="deleteMemory">删除</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="section panel">
+    <view class="label">口味偏好</view>
+    <view wx:if="{{preferences.length === 0}}" class="subtitle">还没有偏好数据</view>
+    <view wx:for="{{preferences}}" wx:key="id" class="preference-row">
+      <view>
+        <view class="preference-title">{{item.value}}</view>
+        <view class="subtitle">{{item.note || "来自饮食记忆"}}</view>
+      </view>
+      <view class="preference-pill">{{item.sentimentText}}</view>
+    </view>
+  </view>
 </view>
