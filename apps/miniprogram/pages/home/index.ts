@@ -32,6 +32,11 @@ interface DashboardResponse {
       targetPerson: "self" | "partner";
       message: string | null;
     }>;
+    pendingMealRequests: Array<{
+      title: string;
+      vendorName: string | null;
+      note: string | null;
+    }>;
     pendingParcels: Array<{
       title: string;
       pickupCode: string;
@@ -58,6 +63,7 @@ Page({
     readyText: "检查中",
     setupText: "检查中",
     setupConfigured: false,
+    mealText: "外卖推荐和想吃请求",
     weatherText: "天气服务待接入",
     waterText: "今天还没有喝水记录",
     parcelText: "暂无待取快递",
@@ -121,12 +127,16 @@ Page({
     const weather = dashboard.weather;
     const parcels = dashboard.pendingParcels;
     const waterReminders = dashboard.pendingWaterReminders;
+    const mealRequests = dashboard.pendingMealRequests;
     const recentExpense = dashboard.recentExpense;
     const todos = dashboard.openTodos;
     const anniversaries = dashboard.upcomingAnniversaries;
 
     this.setData({
       weatherText: `${weather.city} ${weather.condition} ${weather.temperatureC}℃ · ${weather.advice}`,
+      mealText: mealRequests.length > 0
+        ? `${mealRequests.length} 个想吃请求，最近 ${mealRequests[0]?.title ?? ""}`
+        : "外卖推荐和转盘选择",
       waterText: `我 ${selfWater?.drinkCount ?? 0} 次 / 对方 ${partnerWater?.drinkCount ?? 0} 次，提醒 ${waterReminders.length} 个`,
       parcelText: parcels.length > 0
         ? `${parcels.length} 个待取，最近 ${parcels[0]?.pickupCode ?? ""}`
@@ -140,9 +150,12 @@ Page({
       anniversaryText: anniversaries.length > 0
         ? `${anniversaries[0]?.title ?? ""} · 还有 ${anniversaries[0]?.daysLeft ?? 0} 天`
         : "暂无纪念日提醒",
-      heroText: `${weather.condition} ${weather.temperatureC}℃，${todos.length} 个待办，${parcels.length} 个快递，${waterReminders.length} 个喝水提醒`,
+      heroText: `${weather.condition} ${weather.temperatureC}℃，${todos.length} 个待办，${parcels.length} 个快递，${waterReminders.length} 个喝水提醒，${mealRequests.length} 个想吃请求`,
       timeline: [
         `天气：${weather.condition}，${weather.advice}`,
+        mealRequests.length > 0
+          ? `想吃：${mealRequests[0]?.title ?? ""}`
+          : "没有待安排想吃请求",
         waterReminders.length > 0
           ? `喝水提醒：${waterReminders[0]?.message ?? "记得喝水"}`
           : "没有待处理喝水提醒",

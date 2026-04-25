@@ -134,6 +134,17 @@ describe("local MVP routes", () => {
           dueOn: "2026-04-25"
         }
       });
+      await app.inject({
+        method: "POST",
+        url: "/api/meals/requests",
+        payload: {
+          requester: "partner",
+          target: "self",
+          title: "番茄牛腩饭",
+          vendorName: "楼下盖饭",
+          note: null
+        }
+      });
 
       const response = await app.inject({
         method: "POST",
@@ -147,6 +158,7 @@ describe("local MVP routes", () => {
       expect(response.statusCode).toBe(200);
       expect(response.json().reply).toContain("待取快递 1 个");
       expect(response.json().reply).toContain("待办 1 个");
+      expect(response.json().reply).toContain("想吃请求 1 个");
       expect(response.json().reply).not.toContain("：，");
     } finally {
       await app.close();

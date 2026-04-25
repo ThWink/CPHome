@@ -13,7 +13,7 @@
     <view class="quick-grid">
       <view class="quick-tile" bindtap="goMeals">
         <view class="quick-tile-title">今晚吃什么</view>
-        <view class="quick-tile-text">外卖推荐和转盘选择</view>
+        <view class="quick-tile-text">{{mealText}}</view>
       </view>
       <view class="quick-tile" bindtap="goAssistant">
         <view class="quick-tile-title">AI 小管家</view>

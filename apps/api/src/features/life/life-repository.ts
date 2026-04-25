@@ -12,6 +12,8 @@ import {
   type DashboardToday,
   type Expense,
   type ExpenseMonthlySummary,
+  type MealRequest,
+  type MealRequestStatus,
   type Parcel,
   type ParcelStatus,
   type Todo,
@@ -45,6 +47,18 @@ interface ExpensePayerSummaryRow {
   payer: Expense["payer"];
   amount_cents: number;
   count: number;
+}
+
+interface MealRequestRow {
+  id: string;
+  requester: MealRequest["requester"];
+  target: MealRequest["target"];
+  title: string;
+  vendor_name: string | null;
+  note: string | null;
+  status: MealRequestStatus;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ParcelRow {
@@ -107,6 +121,20 @@ function mapExpense(row: ExpenseRow): Expense {
     amountCents: row.amount_cents,
     note: row.note,
     createdAt: row.created_at
+  };
+}
+
+function mapMealRequest(row: MealRequestRow): MealRequest {
+  return {
+    id: row.id,
+    requester: row.requester,
+    target: row.target,
+    title: row.title,
+    vendorName: row.vendor_name,
+    note: row.note,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
   };
 }
 
@@ -488,6 +516,15 @@ export function getExpenseMonthlySummary(database: AppDatabase, monthInput: unkn
   };
 }
 
+export function listPendingMealRequestsForDashboard(database: AppDatabase, limit = 5): MealRequest[] {
+  const safeLimit = Number.isInteger(limit) && limit > 0 ? limit : 5;
+  const rows = database.sqlite
+    .prepare("select * from meal_requests where status = 'pending' order by created_at desc limit ?")
+    .all(safeLimit) as MealRequestRow[];
+
+  return rows.map(mapMealRequest);
+}
+
 export function createTodo(database: AppDatabase, input: unknown): Todo {
   const parsed = parseTodoInput(input);
   const id = nanoid();
@@ -597,6 +634,7 @@ export function getDashboardToday(database: AppDatabase, date: string): Dashboar
     weather: getWeatherToday("本地"),
     water: getWaterTodaySummary(database, date),
     pendingWaterReminders: listPendingWaterReminders(database, date),
+    pendingMealRequests: listPendingMealRequestsForDashboard(database),
     pendingParcels: listPendingParcels(database),
     recentExpense: listRecentExpenses(database, 1)[0] ?? null,
     openTodos: listOpenTodos(database),

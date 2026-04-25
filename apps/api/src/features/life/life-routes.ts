@@ -102,6 +102,7 @@ function getBodyMessage(body: unknown): string {
 function buildLocalAssistantReply(date: string, dashboard: ReturnType<typeof getDashboardToday>): string {
   const summaryParts = [
     `待取快递 ${dashboard.pendingParcels.length} 个`,
+    `想吃请求 ${dashboard.pendingMealRequests.length} 个`,
     `待办 ${dashboard.openTodos.length} 个`,
     `纪念日提醒 ${dashboard.upcomingAnniversaries.length} 个`,
     `喝水记录 ${dashboard.water.people.reduce((sum, item) => sum + item.drinkCount, 0)} 次`

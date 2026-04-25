@@ -20,6 +20,7 @@ interface DashboardResponse {
   dashboard?: {
     weather?: unknown;
     pendingWaterReminders?: unknown[];
+    pendingMealRequests?: unknown[];
     pendingParcels?: unknown[];
     openTodos?: unknown[];
     upcomingAnniversaries?: unknown[];
@@ -187,6 +188,7 @@ export async function runLocalAcceptance(
     return response.status === 200 &&
       dashboard?.weather !== undefined &&
       Array.isArray(dashboard.pendingWaterReminders) &&
+      Array.isArray(dashboard.pendingMealRequests) &&
       Array.isArray(dashboard.pendingParcels) &&
       Array.isArray(dashboard.openTodos) &&
       Array.isArray(dashboard.upcomingAnniversaries)

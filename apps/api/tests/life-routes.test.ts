@@ -379,6 +379,17 @@ describe("life routes", () => {
           message: "drink water"
         }
       });
+      await app.inject({
+        method: "POST",
+        url: "/api/meals/requests",
+        payload: {
+          requester: "partner",
+          target: "self",
+          title: "番茄牛腩饭",
+          vendorName: "楼下盖饭",
+          note: "今晚想吃"
+        }
+      });
 
       const response = await app.inject({
         method: "GET",
@@ -412,6 +423,13 @@ describe("life routes", () => {
             {
               targetPerson: "partner",
               message: "drink water"
+            }
+          ],
+          pendingMealRequests: [
+            {
+              title: "番茄牛腩饭",
+              vendorName: "楼下盖饭",
+              status: "pending"
             }
           ],
           recentExpense: {

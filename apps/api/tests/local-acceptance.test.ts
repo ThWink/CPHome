@@ -31,6 +31,7 @@ describe("local acceptance verifier", () => {
           dashboard: {
             weather: { condition: "多云" },
             pendingWaterReminders: [{ id: "wr1" }],
+            pendingMealRequests: [{ id: "mr1" }],
             pendingParcels: [{ id: "p1" }],
             openTodos: [{ id: "t1" }],
             upcomingAnniversaries: [{ id: "a1" }]

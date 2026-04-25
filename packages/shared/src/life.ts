@@ -1,4 +1,4 @@
-import type { PersonTarget } from "./meal.js";
+import type { MealRequest, PersonTarget } from "./meal.js";
 
 export type ExpenseCategory =
   | "takeout"
@@ -154,6 +154,7 @@ export interface DashboardToday {
   weather: WeatherToday;
   water: WaterTodaySummary;
   pendingWaterReminders: WaterReminder[];
+  pendingMealRequests: MealRequest[];
   pendingParcels: Parcel[];
   recentExpense: Expense | null;
   openTodos: Todo[];
