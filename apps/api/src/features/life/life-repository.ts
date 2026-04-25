@@ -6,6 +6,8 @@ import {
   parseTodoInput,
   parseTodoStatusInput,
   parseWaterDrinkInput,
+  parseWaterReminderInput,
+  parseWaterReminderStatusInput,
   type Anniversary,
   type DashboardToday,
   type Expense,
@@ -15,6 +17,8 @@ import {
   type Todo,
   type UpcomingAnniversary,
   type WaterDrink,
+  type WaterReminder,
+  type WaterReminderStatus,
   type WeatherToday,
   type WaterTodaySummary
 } from "@couple-life/shared";
@@ -61,6 +65,17 @@ interface WaterDrinkRow {
   occurred_on: string;
   amount_ml: number;
   created_at: string;
+}
+
+interface WaterReminderRow {
+  id: string;
+  from_person: WaterReminder["fromPerson"];
+  target_person: WaterReminder["targetPerson"];
+  remind_on: string;
+  message: string | null;
+  status: WaterReminderStatus;
+  created_at: string;
+  updated_at: string;
 }
 
 interface TodoRow {
@@ -116,6 +131,19 @@ function mapWaterDrink(row: WaterDrinkRow): WaterDrink {
     occurredOn: row.occurred_on,
     amountMl: row.amount_ml,
     createdAt: row.created_at
+  };
+}
+
+function mapWaterReminder(row: WaterReminderRow): WaterReminder {
+  return {
+    id: row.id,
+    fromPerson: row.from_person,
+    targetPerson: row.target_person,
+    remindOn: row.remind_on,
+    message: row.message,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
   };
 }
 
@@ -274,6 +302,59 @@ export function getWaterTodaySummary(database: AppDatabase, occurredOn: string):
       };
     })
   };
+}
+
+export function createWaterReminder(database: AppDatabase, input: unknown): WaterReminder {
+  const parsed = parseWaterReminderInput(input);
+  const id = nanoid();
+
+  database.sqlite
+    .prepare(`
+      insert into water_reminders (
+        id,
+        from_person,
+        target_person,
+        remind_on,
+        message
+      ) values (?, ?, ?, ?, ?)
+    `)
+    .run(id, parsed.fromPerson, parsed.targetPerson, parsed.remindOn, parsed.message);
+
+  const row = database.sqlite
+    .prepare("select * from water_reminders where id = ?")
+    .get(id) as WaterReminderRow;
+
+  return mapWaterReminder(row);
+}
+
+export function listPendingWaterReminders(database: AppDatabase, remindOn: string): WaterReminder[] {
+  const rows = database.sqlite
+    .prepare(`
+      select * from water_reminders
+      where status = 'pending' and remind_on <= ?
+      order by remind_on asc, created_at desc
+    `)
+    .all(remindOn) as WaterReminderRow[];
+
+  return rows.map(mapWaterReminder);
+}
+
+export function updateWaterReminderStatus(database: AppDatabase, id: string, input: unknown): WaterReminder {
+  const parsed = parseWaterReminderStatusInput(input);
+
+  database.sqlite
+    .prepare("update water_reminders set status = ?, updated_at = CURRENT_TIMESTAMP where id = ?")
+    .run(parsed.status, id);
+
+  const row = database.sqlite
+    .prepare("select * from water_reminders where id = ?")
+    .get(id) as WaterReminderRow | undefined;
+
+  if (!row) {
+    throw new Error("water reminder not found");
+  }
+
+  return mapWaterReminder(row);
 }
 
 export function createParcel(database: AppDatabase, input: unknown): Parcel {

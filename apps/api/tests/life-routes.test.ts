@@ -91,6 +91,68 @@ describe("life routes", () => {
     }
   });
 
+  it("creates pending water reminders and marks them done", async () => {
+    const app = await buildApp({ databaseUrl: ":memory:" });
+
+    try {
+      const createResponse = await app.inject({
+        method: "POST",
+        url: "/api/water/reminders",
+        payload: {
+          fromPerson: "self",
+          targetPerson: "partner",
+          remindOn: "2026-04-25",
+          message: "Drink some water before dinner"
+        }
+      });
+
+      expect(createResponse.statusCode).toBe(201);
+      const reminder = createResponse.json().reminder;
+      expect(reminder).toMatchObject({
+        fromPerson: "self",
+        targetPerson: "partner",
+        remindOn: "2026-04-25",
+        message: "Drink some water before dinner",
+        status: "pending"
+      });
+
+      const pendingResponse = await app.inject({
+        method: "GET",
+        url: "/api/water/reminders/pending?date=2026-04-25"
+      });
+
+      expect(pendingResponse.statusCode).toBe(200);
+      expect(pendingResponse.json()).toMatchObject({
+        reminders: [
+          {
+            id: reminder.id,
+            targetPerson: "partner",
+            status: "pending"
+          }
+        ]
+      });
+
+      const updateResponse = await app.inject({
+        method: "PATCH",
+        url: `/api/water/reminders/${reminder.id}/status`,
+        payload: {
+          status: "done"
+        }
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+      expect(updateResponse.json().reminder.status).toBe("done");
+
+      const nextPendingResponse = await app.inject({
+        method: "GET",
+        url: "/api/water/reminders/pending?date=2026-04-25"
+      });
+      expect(nextPendingResponse.json()).toEqual({ reminders: [] });
+    } finally {
+      await app.close();
+    }
+  });
+
   it("creates pending parcels and updates their status", async () => {
     const app = await buildApp({ databaseUrl: ":memory:" });
 

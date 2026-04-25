@@ -47,6 +47,14 @@ describe("local acceptance verifier", () => {
         });
       }
 
+      if (url.endsWith("/api/water/reminders")) {
+        return jsonResponse({ reminder: { id: "wr1", status: "pending" } }, 201);
+      }
+
+      if (url.endsWith("/api/water/reminders/wr1/status")) {
+        return jsonResponse({ reminder: { id: "wr1", status: "done" } });
+      }
+
       if (url.endsWith("/api/meals/recommendations")) {
         return jsonResponse({
           recommendations: [{ title: "番茄牛腩饭" }, { title: "砂锅粥" }, { title: "小碗菜" }],
@@ -89,6 +97,7 @@ describe("local acceptance verifier", () => {
       "setup",
       "dashboard",
       "weather",
+      "water reminders",
       "meal recommendations",
       "meal memories",
       "expense summary",

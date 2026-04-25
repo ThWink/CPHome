@@ -33,6 +33,7 @@ export {
 } from "./meal.js";
 
 export type {
+  CouplePerson,
   DashboardToday,
   Anniversary,
   AnniversaryInput,
@@ -54,6 +55,10 @@ export type {
   UpcomingAnniversary,
   WaterDrink,
   WaterDrinkInput,
+  WaterReminder,
+  WaterReminderInput,
+  WaterReminderStatus,
+  WaterReminderStatusInput,
   WaterTodaySummary,
   WeatherToday
 } from "./life.js";
@@ -65,5 +70,7 @@ export {
   parseParcelStatusInput,
   parseTodoInput,
   parseTodoStatusInput,
-  parseWaterDrinkInput
+  parseWaterDrinkInput,
+  parseWaterReminderInput,
+  parseWaterReminderStatusInput
 } from "./life.js";

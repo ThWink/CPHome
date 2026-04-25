@@ -2,15 +2,37 @@
   <view class="title">喝水</view>
   <view class="subtitle">{{statusText}}</view>
 
-  <view class="section panel">
-    <view class="label">我</view>
-    <view class="value">{{selfText}}</view>
-    <button class="button action-gap" bindtap="addSelfDrink">我喝了一杯</button>
+  <view class="section water-grid">
+    <view class="panel water-card">
+      <view class="label">我</view>
+      <view class="value">{{selfText}}</view>
+      <button class="button action-gap" bindtap="addSelfDrink">我喝了一杯</button>
+      <button class="button secondary action-gap small-action" bindtap="remindSelf">提醒自己</button>
+    </view>
+
+    <view class="panel water-card">
+      <view class="label">对方</view>
+      <view class="value">{{partnerText}}</view>
+      <button class="button action-gap" bindtap="addPartnerDrink">对方已喝一杯</button>
+      <button class="button secondary action-gap small-action" bindtap="remindPartner">提醒对方</button>
+    </view>
   </view>
 
   <view class="section panel">
-    <view class="label">对方</view>
-    <view class="value">{{partnerText}}</view>
-    <button class="button secondary action-gap" bindtap="addPartnerDrink">提醒后记录一杯</button>
+    <view class="row">
+      <view>
+        <view class="label">喝水提醒</view>
+        <view class="value reminder-title">{{reminderStatusText}}</view>
+      </view>
+      <button class="button secondary refresh-button" bindtap="refreshAll">刷新</button>
+    </view>
+
+    <view wx:for="{{reminders}}" wx:key="id" class="reminder-row">
+      <view class="reminder-main">
+        <view class="label">{{item.fromText}} 提醒 {{item.targetText}}</view>
+        <view class="reminder-message">{{item.message}}</view>
+      </view>
+      <button class="button soft done-button" data-id="{{item.id}}" bindtap="completeReminder">完成</button>
+    </view>
   </view>
 </view>

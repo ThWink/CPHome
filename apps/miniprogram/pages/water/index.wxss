@@ -1,3 +1,54 @@
 .action-gap {
   margin-top: 22rpx;
 }
+
+.water-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18rpx;
+}
+
+.water-card {
+  min-height: 260rpx;
+}
+
+.small-action {
+  height: 62rpx;
+  line-height: 62rpx;
+}
+
+.refresh-button {
+  width: 132rpx;
+  min-width: 132rpx;
+}
+
+.reminder-title {
+  font-size: 28rpx;
+}
+
+.reminder-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  margin-top: 22rpx;
+  padding-top: 22rpx;
+  border-top: 1rpx solid #eadfd1;
+}
+
+.reminder-main {
+  min-width: 0;
+}
+
+.reminder-message {
+  margin-top: 8rpx;
+  color: #2b2520;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.done-button {
+  width: 120rpx;
+  min-width: 120rpx;
+}

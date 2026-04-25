@@ -8,6 +8,7 @@ import {
   createParcel,
   createTodo,
   createWaterDrink,
+  createWaterReminder,
   getDashboardToday,
   getExpenseMonthlySummary,
   getWeatherToday,
@@ -15,11 +16,13 @@ import {
   listOpenTodos,
   listUpcomingAnniversaries,
   listPendingParcels,
+  listPendingWaterReminders,
   listRecentExpenses,
   normalizeLocalDate,
   normalizeLocalMonth,
   updateParcelStatus,
-  updateTodoStatus
+  updateTodoStatus,
+  updateWaterReminderStatus
 } from "./life-repository.js";
 
 export interface LifeRouteOptions {
@@ -50,6 +53,10 @@ function getParcelId(params: unknown): string {
 
 function getTodoId(params: unknown): string {
   return getRequiredId(params, "todo id");
+}
+
+function getWaterReminderId(params: unknown): string {
+  return getRequiredId(params, "water reminder id");
 }
 
 function getRequiredId(params: unknown, label: string): string {
@@ -174,6 +181,59 @@ export async function registerLifeRoutes(
       if (error instanceof Error) {
         return reply.code(400).send({
           error: "INVALID_WATER_QUERY",
+          message: error.message
+        });
+      }
+
+      throw error;
+    }
+  });
+
+  app.post("/api/water/reminders", async (request, reply) => {
+    try {
+      const reminder = createWaterReminder(options.database, request.body);
+      return reply.code(201).send({ reminder });
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.code(400).send({
+          error: "INVALID_WATER_REMINDER_INPUT",
+          message: error.message
+        });
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/water/reminders/pending", async (request, reply) => {
+    try {
+      const date = getQueryDate(request.query);
+      return {
+        reminders: listPendingWaterReminders(options.database, date)
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.code(400).send({
+          error: "INVALID_WATER_REMINDER_QUERY",
+          message: error.message
+        });
+      }
+
+      throw error;
+    }
+  });
+
+  app.patch("/api/water/reminders/:id/status", async (request, reply) => {
+    try {
+      const id = getWaterReminderId(request.params);
+      const reminder = updateWaterReminderStatus(options.database, id, request.body);
+      return { reminder };
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.code(error.message === "water reminder not found" ? 404 : 400).send({
+          error: error.message === "water reminder not found"
+            ? "WATER_REMINDER_NOT_FOUND"
+            : "INVALID_WATER_REMINDER_STATUS",
           message: error.message
         });
       }

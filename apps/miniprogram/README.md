@@ -44,7 +44,7 @@ Current local MVP pages:
 - Setup: initialize the one-couple deployment.
 - Meals: takeout recommendations, roulette, and meal memory confirmation.
 - Weather: online weather with local fallback advice for takeout and errands.
-- Water: record today's drink counts for both people.
+- Water: record today's drink counts and create/complete drink-water reminders.
 - Parcels: publish pending parcels and mark them picked.
 - Expenses: record categorized shared expenses with payer selection and monthly summary.
 - Todos: create and complete shared daily tasks.

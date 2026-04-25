@@ -13,6 +13,8 @@ export type ExpenseCategory =
 export type ParcelStatus = "pending" | "picked" | "canceled";
 export type TodoStatus = "open" | "done";
 export type AnniversaryRepeat = "none" | "yearly";
+export type CouplePerson = "self" | "partner";
+export type WaterReminderStatus = "pending" | "done";
 
 export interface ExpenseInput {
   occurredOn: string;
@@ -74,6 +76,24 @@ export interface WaterDrinkInput {
 export interface WaterDrink extends WaterDrinkInput {
   id: string;
   createdAt: string;
+}
+
+export interface WaterReminderInput {
+  fromPerson: CouplePerson;
+  targetPerson: CouplePerson;
+  remindOn: string;
+  message: string | null;
+}
+
+export interface WaterReminder extends WaterReminderInput {
+  id: string;
+  status: WaterReminderStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WaterReminderStatusInput {
+  status: WaterReminderStatus;
 }
 
 export interface TodoInput {
@@ -140,6 +160,7 @@ export interface DashboardToday {
 }
 
 const people: PersonTarget[] = ["self", "partner", "both"];
+const couplePeople: CouplePerson[] = ["self", "partner"];
 const expenseCategories: ExpenseCategory[] = [
   "takeout",
   "groceries",
@@ -152,6 +173,7 @@ const expenseCategories: ExpenseCategory[] = [
 ];
 const parcelStatuses: ParcelStatus[] = ["pending", "picked", "canceled"];
 const todoStatuses: TodoStatus[] = ["open", "done"];
+const waterReminderStatuses: WaterReminderStatus[] = ["pending", "done"];
 const anniversaryRepeats: AnniversaryRepeat[] = ["none", "yearly"];
 
 function normalizeRequiredText(value: unknown, fieldName: string, maxLength = 80): string {
@@ -268,6 +290,33 @@ export function parseWaterDrinkInput(input: unknown): WaterDrinkInput {
     person: normalizeEnum(record.person, people, "person"),
     occurredOn: normalizeDate(record.occurredOn, "occurredOn"),
     amountMl: normalizeNonNegativeInteger(amountMl, "amountMl")
+  };
+}
+
+export function parseWaterReminderInput(input: unknown): WaterReminderInput {
+  if (typeof input !== "object" || input === null) {
+    throw new Error("water reminder input must be an object");
+  }
+
+  const record = input as Record<string, unknown>;
+
+  return {
+    fromPerson: normalizeEnum(record.fromPerson, couplePeople, "fromPerson"),
+    targetPerson: normalizeEnum(record.targetPerson, couplePeople, "targetPerson"),
+    remindOn: normalizeDate(record.remindOn, "remindOn"),
+    message: normalizeNullableText(record.message, "message")
+  };
+}
+
+export function parseWaterReminderStatusInput(input: unknown): WaterReminderStatusInput {
+  if (typeof input !== "object" || input === null) {
+    throw new Error("water reminder status input must be an object");
+  }
+
+  const record = input as Record<string, unknown>;
+
+  return {
+    status: normalizeEnum(record.status, waterReminderStatuses, "status")
   };
 }
 

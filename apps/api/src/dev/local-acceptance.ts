@@ -33,6 +33,13 @@ interface WeatherResponse {
   };
 }
 
+interface WaterReminderResponse {
+  reminder?: {
+    id?: unknown;
+    status?: unknown;
+  };
+}
+
 interface RecommendationsResponse {
   recommendations?: unknown[];
   rouletteCandidates?: unknown[];
@@ -194,6 +201,44 @@ export async function runLocalAcceptance(
       typeof weather.temperatureC === "number"
       ? pass("weather", "weather data is available")
       : fail("weather", `weather failed, got HTTP ${response.status}`);
+  })) {
+    return finish(checks);
+  }
+
+  if (!await appendCheck(checks, async () => {
+    const createResponse = await readJson<WaterReminderResponse>(
+      "/api/water/reminders",
+      options,
+      {
+        method: "POST",
+        body: {
+          fromPerson: "self",
+          targetPerson: "partner",
+          remindOn: options.today,
+          message: "local acceptance reminder"
+        }
+      }
+    );
+    const reminderId = createResponse.body.reminder?.id;
+
+    if (createResponse.status !== 201 || typeof reminderId !== "string") {
+      return fail("water reminders", `water reminder creation failed, got HTTP ${createResponse.status}`);
+    }
+
+    const updateResponse = await readJson<WaterReminderResponse>(
+      `/api/water/reminders/${encodeURIComponent(reminderId)}/status`,
+      options,
+      {
+        method: "PATCH",
+        body: {
+          status: "done"
+        }
+      }
+    );
+
+    return updateResponse.status === 200 && updateResponse.body.reminder?.status === "done"
+      ? pass("water reminders", "water reminder can be created and completed")
+      : fail("water reminders", `water reminder completion failed, got HTTP ${updateResponse.status}`);
   })) {
     return finish(checks);
   }

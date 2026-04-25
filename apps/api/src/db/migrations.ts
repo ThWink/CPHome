@@ -127,6 +127,17 @@ export function runMigrations(sqlite: SqliteDatabase): void {
       created_at text not null default CURRENT_TIMESTAMP
     );
 
+    create table if not exists water_reminders (
+      id text primary key,
+      from_person text not null check (from_person in ('self', 'partner')),
+      target_person text not null check (target_person in ('self', 'partner')),
+      remind_on text not null,
+      message text,
+      status text not null default 'pending' check (status in ('pending', 'done')),
+      created_at text not null default CURRENT_TIMESTAMP,
+      updated_at text not null default CURRENT_TIMESTAMP
+    );
+
     create index if not exists idx_expenses_occurred_on
       on expenses(occurred_on);
 
@@ -135,6 +146,9 @@ export function runMigrations(sqlite: SqliteDatabase): void {
 
     create index if not exists idx_water_drinks_today
       on water_drinks(occurred_on, person);
+
+    create index if not exists idx_water_reminders_pending
+      on water_reminders(status, remind_on, created_at);
 
     create table if not exists todos (
       id text primary key,
