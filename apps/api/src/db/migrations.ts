@@ -1,5 +1,12 @@
 import type { SqliteDatabase } from "./client.js";
 
+function columnExists(sqlite: SqliteDatabase, tableName: string, columnName: string): boolean {
+  return sqlite
+    .prepare(`pragma table_info(${tableName})`)
+    .all()
+    .some((row) => (row as { name: string }).name === columnName);
+}
+
 export function runMigrations(sqlite: SqliteDatabase): void {
   sqlite.exec(`
     create table if not exists couples (
@@ -35,6 +42,36 @@ export function runMigrations(sqlite: SqliteDatabase): void {
       note text,
       created_at text not null default CURRENT_TIMESTAMP
     );
+  `);
+
+  if (!columnExists(sqlite, "meal_records", "meal_kind")) {
+    sqlite.exec("alter table meal_records add column meal_kind text not null default 'takeout'");
+  }
+
+  if (!columnExists(sqlite, "meal_records", "person")) {
+    sqlite.exec("alter table meal_records add column person text not null default 'both'");
+  }
+
+  sqlite.exec(`
+    create table if not exists taste_preferences (
+      id text primary key,
+      person text not null check (person in ('self', 'partner', 'both')),
+      category text not null check (category in ('dish', 'cuisine', 'taste', 'ingredient', 'vendor')),
+      value text not null,
+      sentiment text not null check (sentiment in ('like', 'dislike', 'avoid')),
+      weight integer not null check (weight >= -100 and weight <= 100),
+      note text,
+      created_at text not null default CURRENT_TIMESTAMP,
+      updated_at text not null default CURRENT_TIMESTAMP,
+      unique (person, category, value)
+    );
+
+    create table if not exists meal_memory_entries (
+      id text primary key,
+      meal_record_id text not null references meal_records(id),
+      content text not null,
+      created_at text not null default CURRENT_TIMESTAMP
+    );
 
     create table if not exists memory_embeddings (
       id text primary key,
@@ -53,5 +90,11 @@ export function runMigrations(sqlite: SqliteDatabase): void {
 
     create index if not exists idx_memory_embeddings_source
       on memory_embeddings(source_table, source_id);
+
+    create index if not exists idx_meal_records_occurred_on
+      on meal_records(occurred_on);
+
+    create index if not exists idx_taste_preferences_lookup
+      on taste_preferences(person, category, value);
   `);
 }

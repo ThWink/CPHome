@@ -14,24 +14,37 @@ afterEach(() => {
 });
 
 describe("database migrations", () => {
-  it("creates foundation tables", () => {
+  it("creates foundation and meal memory tables", () => {
     const dir = mkdtempSync(join(tmpdir(), "couple-life-db-"));
     tempDirs.push(dir);
 
     const database = openDatabase(`file:${join(dir, "app.db")}`);
-    runMigrations(database.sqlite);
 
-    const tables = database.sqlite
-      .prepare("select name from sqlite_master where type = 'table' order by name")
-      .all()
-      .map((row) => (row as { name: string }).name);
+    try {
+      runMigrations(database.sqlite);
 
-    expect(tables).toContain("couples");
-    expect(tables).toContain("users");
-    expect(tables).toContain("couple_members");
-    expect(tables).toContain("meal_records");
-    expect(tables).toContain("memory_embeddings");
+      const tables = database.sqlite
+        .prepare("select name from sqlite_master where type = 'table' order by name")
+        .all()
+        .map((row) => (row as { name: string }).name);
 
-    database.sqlite.close();
+      expect(tables).toContain("couples");
+      expect(tables).toContain("users");
+      expect(tables).toContain("couple_members");
+      expect(tables).toContain("meal_records");
+      expect(tables).toContain("taste_preferences");
+      expect(tables).toContain("meal_memory_entries");
+      expect(tables).toContain("memory_embeddings");
+
+      const mealColumns = database.sqlite
+        .prepare("pragma table_info(meal_records)")
+        .all()
+        .map((row) => (row as { name: string }).name);
+
+      expect(mealColumns).toContain("meal_kind");
+      expect(mealColumns).toContain("person");
+    } finally {
+      database.sqlite.close();
+    }
   });
 });
