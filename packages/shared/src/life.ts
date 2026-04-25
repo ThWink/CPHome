@@ -11,6 +11,8 @@ export type ExpenseCategory =
   | "other";
 
 export type ParcelStatus = "pending" | "picked" | "canceled";
+export type TodoStatus = "open" | "done";
+export type AnniversaryRepeat = "none" | "yearly";
 
 export interface ExpenseInput {
   occurredOn: string;
@@ -55,6 +57,49 @@ export interface WaterDrink extends WaterDrinkInput {
   createdAt: string;
 }
 
+export interface TodoInput {
+  title: string;
+  assignee: PersonTarget;
+  dueOn: string | null;
+}
+
+export interface Todo extends TodoInput {
+  id: string;
+  status: TodoStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TodoStatusInput {
+  status: TodoStatus;
+}
+
+export interface AnniversaryInput {
+  title: string;
+  date: string;
+  repeat: AnniversaryRepeat;
+  remindDaysBefore: number;
+}
+
+export interface Anniversary extends AnniversaryInput {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpcomingAnniversary extends Anniversary {
+  nextOn: string;
+  daysLeft: number;
+}
+
+export interface WeatherToday {
+  city: string;
+  condition: string;
+  temperatureC: number;
+  advice: string;
+  updatedAt: string;
+}
+
 export interface WaterTodaySummary {
   occurredOn: string;
   people: Array<{
@@ -66,9 +111,12 @@ export interface WaterTodaySummary {
 
 export interface DashboardToday {
   date: string;
+  weather: WeatherToday;
   water: WaterTodaySummary;
   pendingParcels: Parcel[];
   recentExpense: Expense | null;
+  openTodos: Todo[];
+  upcomingAnniversaries: UpcomingAnniversary[];
 }
 
 const people: PersonTarget[] = ["self", "partner", "both"];
@@ -83,6 +131,8 @@ const expenseCategories: ExpenseCategory[] = [
   "other"
 ];
 const parcelStatuses: ParcelStatus[] = ["pending", "picked", "canceled"];
+const todoStatuses: TodoStatus[] = ["open", "done"];
+const anniversaryRepeats: AnniversaryRepeat[] = ["none", "yearly"];
 
 function normalizeRequiredText(value: unknown, fieldName: string, maxLength = 80): string {
   if (typeof value !== "string") {
@@ -124,6 +174,14 @@ function normalizeDate(value: unknown, fieldName: string): string {
   }
 
   return date;
+}
+
+function normalizeNullableDate(value: unknown, fieldName: string): string | null {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  return normalizeDate(value, fieldName);
 }
 
 function normalizeNonNegativeInteger(value: unknown, fieldName: string): number {
@@ -190,5 +248,56 @@ export function parseWaterDrinkInput(input: unknown): WaterDrinkInput {
     person: normalizeEnum(record.person, people, "person"),
     occurredOn: normalizeDate(record.occurredOn, "occurredOn"),
     amountMl: normalizeNonNegativeInteger(amountMl, "amountMl")
+  };
+}
+
+export function parseTodoInput(input: unknown): TodoInput {
+  if (typeof input !== "object" || input === null) {
+    throw new Error("todo input must be an object");
+  }
+
+  const record = input as Record<string, unknown>;
+
+  return {
+    title: normalizeRequiredText(record.title, "title"),
+    assignee: normalizeEnum(record.assignee, people, "assignee"),
+    dueOn: normalizeNullableDate(record.dueOn, "dueOn")
+  };
+}
+
+export function parseTodoStatusInput(input: unknown): TodoStatusInput {
+  if (typeof input !== "object" || input === null) {
+    throw new Error("todo status input must be an object");
+  }
+
+  const record = input as Record<string, unknown>;
+
+  return {
+    status: normalizeEnum(record.status, todoStatuses, "status")
+  };
+}
+
+export function parseAnniversaryInput(input: unknown): AnniversaryInput {
+  if (typeof input !== "object" || input === null) {
+    throw new Error("anniversary input must be an object");
+  }
+
+  const record = input as Record<string, unknown>;
+  const remindDaysBefore = record.remindDaysBefore ?? 0;
+
+  if (
+    typeof remindDaysBefore !== "number" ||
+    !Number.isInteger(remindDaysBefore) ||
+    remindDaysBefore < 0 ||
+    remindDaysBefore > 30
+  ) {
+    throw new Error("remindDaysBefore must be an integer from 0 to 30");
+  }
+
+  return {
+    title: normalizeRequiredText(record.title, "title"),
+    date: normalizeDate(record.date, "date"),
+    repeat: normalizeEnum(record.repeat, anniversaryRepeats, "repeat"),
+    remindDaysBefore
   };
 }

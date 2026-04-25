@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  parseAnniversaryInput,
   parseExpenseInput,
   parseParcelInput,
   parseParcelStatusInput,
+  parseTodoInput,
+  parseTodoStatusInput,
   parseWaterDrinkInput
 } from "../src/life.js";
 
@@ -72,6 +75,42 @@ describe("life contracts", () => {
       person: "self",
       occurredOn: "2026-04-25",
       amountMl: 300
+    });
+  });
+
+  it("normalizes todo input", () => {
+    expect(
+      parseTodoInput({
+        title: "  记得拿快递  ",
+        assignee: "both",
+        dueOn: "2026-04-25"
+      })
+    ).toEqual({
+      title: "记得拿快递",
+      assignee: "both",
+      dueOn: "2026-04-25"
+    });
+  });
+
+  it("normalizes todo status input", () => {
+    expect(parseTodoStatusInput({ status: "done" })).toEqual({
+      status: "done"
+    });
+  });
+
+  it("normalizes anniversary input", () => {
+    expect(
+      parseAnniversaryInput({
+        title: "  在一起纪念日  ",
+        date: "2026-05-20",
+        repeat: "yearly",
+        remindDaysBefore: 3
+      })
+    ).toEqual({
+      title: "在一起纪念日",
+      date: "2026-05-20",
+      repeat: "yearly",
+      remindDaysBefore: 3
     });
   });
 });

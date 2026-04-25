@@ -34,6 +34,9 @@ export {
 
 export type {
   DashboardToday,
+  Anniversary,
+  AnniversaryInput,
+  AnniversaryRepeat,
   Expense,
   ExpenseCategory,
   ExpenseInput,
@@ -41,14 +44,23 @@ export type {
   ParcelInput,
   ParcelStatus,
   ParcelStatusInput,
+  Todo,
+  TodoInput,
+  TodoStatus,
+  TodoStatusInput,
+  UpcomingAnniversary,
   WaterDrink,
   WaterDrinkInput,
-  WaterTodaySummary
+  WaterTodaySummary,
+  WeatherToday
 } from "./life.js";
 
 export {
+  parseAnniversaryInput,
   parseExpenseInput,
   parseParcelInput,
   parseParcelStatusInput,
+  parseTodoInput,
+  parseTodoStatusInput,
   parseWaterDrinkInput
 } from "./life.js";

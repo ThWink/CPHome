@@ -76,6 +76,58 @@ export const memoryEmbeddings = sqliteTable("memory_embeddings", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`)
 });
 
+export const expenses = sqliteTable("expenses", {
+  id: text("id").primaryKey(),
+  occurredOn: text("occurred_on").notNull(),
+  category: text("category", {
+    enum: ["takeout", "groceries", "daily", "rent", "utilities", "transport", "entertainment", "other"]
+  }).notNull(),
+  payer: text("payer", { enum: ["self", "partner", "both"] }).notNull(),
+  amountCents: integer("amount_cents").notNull(),
+  note: text("note"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+
+export const parcels = sqliteTable("parcels", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  pickupCode: text("pickup_code").notNull(),
+  location: text("location").notNull(),
+  owner: text("owner", { enum: ["self", "partner", "both"] }).notNull(),
+  status: text("status", { enum: ["pending", "picked", "canceled"] }).notNull(),
+  note: text("note"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+
+export const waterDrinks = sqliteTable("water_drinks", {
+  id: text("id").primaryKey(),
+  person: text("person", { enum: ["self", "partner", "both"] }).notNull(),
+  occurredOn: text("occurred_on").notNull(),
+  amountMl: integer("amount_ml").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+
+export const todos = sqliteTable("todos", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  assignee: text("assignee", { enum: ["self", "partner", "both"] }).notNull(),
+  dueOn: text("due_on"),
+  status: text("status", { enum: ["open", "done"] }).notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+
+export const anniversaries = sqliteTable("anniversaries", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  date: text("date").notNull(),
+  repeat: text("repeat", { enum: ["none", "yearly"] }).notNull(),
+  remindDaysBefore: integer("remind_days_before").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+
 export const schema = {
   couples,
   users,
@@ -83,5 +135,10 @@ export const schema = {
   mealRecords,
   tastePreferences,
   mealMemoryEntries,
-  memoryEmbeddings
+  memoryEmbeddings,
+  expenses,
+  parcels,
+  waterDrinks,
+  todos,
+  anniversaries
 };

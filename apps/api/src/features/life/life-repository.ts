@@ -1,13 +1,20 @@
 import {
+  parseAnniversaryInput,
   parseExpenseInput,
   parseParcelInput,
   parseParcelStatusInput,
+  parseTodoInput,
+  parseTodoStatusInput,
   parseWaterDrinkInput,
+  type Anniversary,
   type DashboardToday,
   type Expense,
   type Parcel,
   type ParcelStatus,
+  type Todo,
+  type UpcomingAnniversary,
   type WaterDrink,
+  type WeatherToday,
   type WaterTodaySummary
 } from "@couple-life/shared";
 import { nanoid } from "nanoid";
@@ -41,6 +48,26 @@ interface WaterDrinkRow {
   occurred_on: string;
   amount_ml: number;
   created_at: string;
+}
+
+interface TodoRow {
+  id: string;
+  title: string;
+  assignee: Todo["assignee"];
+  due_on: string | null;
+  status: Todo["status"];
+  created_at: string;
+  updated_at: string;
+}
+
+interface AnniversaryRow {
+  id: string;
+  title: string;
+  date: string;
+  repeat: Anniversary["repeat"];
+  remind_days_before: number;
+  created_at: string;
+  updated_at: string;
 }
 
 function mapExpense(row: ExpenseRow): Expense {
@@ -79,6 +106,30 @@ function mapWaterDrink(row: WaterDrinkRow): WaterDrink {
   };
 }
 
+function mapTodo(row: TodoRow): Todo {
+  return {
+    id: row.id,
+    title: row.title,
+    assignee: row.assignee,
+    dueOn: row.due_on,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function mapAnniversary(row: AnniversaryRow): Anniversary {
+  return {
+    id: row.id,
+    title: row.title,
+    date: row.date,
+    repeat: row.repeat,
+    remindDaysBefore: row.remind_days_before,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
 export function normalizeLocalDate(value: unknown): string {
   if (value === undefined || value === null || value === "") {
     return new Date().toISOString().slice(0, 10);
@@ -89,6 +140,49 @@ export function normalizeLocalDate(value: unknown): string {
   }
 
   return value;
+}
+
+function parseDateUtc(date: string): Date {
+  return new Date(`${date}T00:00:00.000Z`);
+}
+
+function formatDateUtc(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function daysBetween(start: string, end: string): number {
+  const msPerDay = 24 * 60 * 60 * 1000;
+  return Math.round((parseDateUtc(end).getTime() - parseDateUtc(start).getTime()) / msPerDay);
+}
+
+function getNextAnniversaryDate(anniversary: Anniversary, fromDate: string): string | null {
+  if (anniversary.repeat === "none") {
+    return anniversary.date >= fromDate ? anniversary.date : null;
+  }
+
+  const from = parseDateUtc(fromDate);
+  const [, month, day] = anniversary.date.split("-");
+  let next = parseDateUtc(`${from.getUTCFullYear()}-${month}-${day}`);
+
+  if (formatDateUtc(next) < fromDate) {
+    next = parseDateUtc(`${from.getUTCFullYear() + 1}-${month}-${day}`);
+  }
+
+  return formatDateUtc(next);
+}
+
+export function getWeatherToday(cityInput: unknown): WeatherToday {
+  const city = typeof cityInput === "string" && cityInput.trim().length > 0
+    ? cityInput.trim().slice(0, 20)
+    : "本地";
+
+  return {
+    city,
+    condition: "多云",
+    temperatureC: 24,
+    advice: "适合点一份热乎但不油腻的外卖，出门取快递记得带伞。",
+    updatedAt: new Date().toISOString()
+  };
 }
 
 export function createWaterDrink(database: AppDatabase, input: unknown): WaterDrink {
@@ -225,11 +319,117 @@ export function listRecentExpenses(database: AppDatabase, limit: number): Expens
   return rows.map(mapExpense);
 }
 
+export function createTodo(database: AppDatabase, input: unknown): Todo {
+  const parsed = parseTodoInput(input);
+  const id = nanoid();
+
+  database.sqlite
+    .prepare(`
+      insert into todos (
+        id,
+        title,
+        assignee,
+        due_on
+      ) values (?, ?, ?, ?)
+    `)
+    .run(id, parsed.title, parsed.assignee, parsed.dueOn);
+
+  const row = database.sqlite
+    .prepare("select * from todos where id = ?")
+    .get(id) as TodoRow;
+
+  return mapTodo(row);
+}
+
+export function listOpenTodos(database: AppDatabase): Todo[] {
+  const rows = database.sqlite
+    .prepare(`
+      select * from todos
+      where status = 'open'
+      order by due_on is null, due_on asc, created_at desc
+    `)
+    .all() as TodoRow[];
+
+  return rows.map(mapTodo);
+}
+
+export function updateTodoStatus(database: AppDatabase, id: string, input: unknown): Todo {
+  const parsed = parseTodoStatusInput(input);
+
+  database.sqlite
+    .prepare("update todos set status = ?, updated_at = CURRENT_TIMESTAMP where id = ?")
+    .run(parsed.status, id);
+
+  const row = database.sqlite
+    .prepare("select * from todos where id = ?")
+    .get(id) as TodoRow | undefined;
+
+  if (!row) {
+    throw new Error("todo not found");
+  }
+
+  return mapTodo(row);
+}
+
+export function createAnniversary(database: AppDatabase, input: unknown): Anniversary {
+  const parsed = parseAnniversaryInput(input);
+  const id = nanoid();
+
+  database.sqlite
+    .prepare(`
+      insert into anniversaries (
+        id,
+        title,
+        date,
+        repeat,
+        remind_days_before
+      ) values (?, ?, ?, ?, ?)
+    `)
+    .run(id, parsed.title, parsed.date, parsed.repeat, parsed.remindDaysBefore);
+
+  const row = database.sqlite
+    .prepare("select * from anniversaries where id = ?")
+    .get(id) as AnniversaryRow;
+
+  return mapAnniversary(row);
+}
+
+export function listUpcomingAnniversaries(
+  database: AppDatabase,
+  fromDate: string,
+  limit = 10
+): UpcomingAnniversary[] {
+  const rows = database.sqlite
+    .prepare("select * from anniversaries order by date asc")
+    .all() as AnniversaryRow[];
+
+  return rows
+    .map(mapAnniversary)
+    .map((anniversary) => {
+      const nextOn = getNextAnniversaryDate(anniversary, fromDate);
+      if (nextOn === null) {
+        return null;
+      }
+
+      return {
+        ...anniversary,
+        nextOn,
+        daysLeft: daysBetween(fromDate, nextOn)
+      };
+    })
+    .filter((anniversary): anniversary is UpcomingAnniversary => anniversary !== null)
+    .sort((a, b) => a.daysLeft - b.daysLeft)
+    .slice(0, limit);
+}
+
 export function getDashboardToday(database: AppDatabase, date: string): DashboardToday {
   return {
     date,
+    weather: getWeatherToday("本地"),
     water: getWaterTodaySummary(database, date),
     pendingParcels: listPendingParcels(database),
-    recentExpense: listRecentExpenses(database, 1)[0] ?? null
+    recentExpense: listRecentExpenses(database, 1)[0] ?? null,
+    openTodos: listOpenTodos(database),
+    upcomingAnniversaries: listUpcomingAnniversaries(database, date, 5)
   };
 }

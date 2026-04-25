@@ -13,3 +13,4 @@ data/
 Thumbs.db
 apps/miniprogram/**/*.js
 apps/miniprogram/project.private.config.json
+.superpowers/

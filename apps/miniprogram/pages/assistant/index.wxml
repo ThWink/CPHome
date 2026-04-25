@@ -1,0 +1,15 @@
+<view class="page">
+  <view class="title">AI 小管家</view>
+  <view class="subtitle">先做本地生活摘要，后续接入在线 API 和 Ollama</view>
+
+  <view class="hero-panel">
+    <view class="label">小管家回复</view>
+    <view class="hero-note">{{reply}}</view>
+  </view>
+
+  <view class="section panel">
+    <view class="label">想问什么</view>
+    <textarea class="textarea" value="{{message}}" bindinput="onMessageInput" maxlength="200" />
+    <button class="button action-gap" loading="{{loading}}" bindtap="askAssistant">问一下</button>
+  </view>
+</view>

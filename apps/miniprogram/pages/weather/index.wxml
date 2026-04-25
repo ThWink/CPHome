@@ -1,0 +1,16 @@
+<view class="page">
+  <view class="title">天气</view>
+  <view class="subtitle">给今天的外卖、出门和取快递一点参考</view>
+
+  <view class="hero-panel">
+    <view class="label">今日天气</view>
+    <view class="hero-title">{{weatherText}}</view>
+    <view class="hero-note">{{advice}}</view>
+  </view>
+
+  <view class="section panel">
+    <view class="label">城市</view>
+    <input class="input" value="{{city}}" bindinput="onCityInput" placeholder="比如 南昌" />
+    <button class="button action-gap" bindtap="loadWeather">刷新天气</button>
+  </view>
+</view>

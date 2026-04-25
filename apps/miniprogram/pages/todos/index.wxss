@@ -1,0 +1,16 @@
+.field-gap {
+  margin-top: 22rpx;
+}
+
+.action-gap {
+  margin-top: 24rpx;
+}
+
+.todo-card {
+  margin-bottom: 18rpx;
+  border-color: #d8e2dc;
+}
+
+.todo-card .value {
+  color: #273f36;
+}

@@ -2,40 +2,54 @@
   <view class="row">
     <view>
       <view class="title">两人小家</view>
-      <view class="subtitle">今天的生活入口和状态概览</view>
+      <view class="subtitle">今天也把小日子过稳一点</view>
     </view>
-    <button class="button secondary" bindtap="goSettings">设置</button>
+    <view class="pill" bindtap="goSettings">设置</view>
   </view>
 
-  <view class="section panel">
-    <view class="label">服务状态</view>
-    <view class="value">{{readyText}}</view>
+  <view class="hero-panel">
+    <view class="hero-title">今天的小日子，刚刚好</view>
+    <view class="hero-note">{{heroText}}</view>
+    <view class="quick-grid">
+      <view class="quick-tile" bindtap="goMeals">
+        <view class="quick-tile-title">今晚吃什么</view>
+        <view class="quick-tile-text">外卖推荐和转盘拍板</view>
+      </view>
+      <view class="quick-tile" bindtap="goAssistant">
+        <view class="quick-tile-title">AI 小管家</view>
+        <view class="quick-tile-text">问问今天有什么事</view>
+      </view>
+      <view class="quick-tile" bindtap="goWater">
+        <view class="quick-tile-title">喝水</view>
+        <view class="quick-tile-text">{{waterText}}</view>
+      </view>
+      <view class="quick-tile" bindtap="goParcels">
+        <view class="quick-tile-title">快递</view>
+        <view class="quick-tile-text">{{parcelText}}</view>
+      </view>
+    </view>
   </view>
 
   <view class="section panel">
     <view class="row">
       <view class="row-main">
-        <view class="label">情侣绑定</view>
-        <view class="value">{{setupText}}</view>
+        <view class="label">本地服务</view>
+        <view class="value">{{readyText}}</view>
+        <view class="subtitle">{{setupText}}</view>
       </view>
       <button class="button secondary" bindtap="goSetup">{{setupConfigured ? "查看" : "去绑定"}}</button>
     </view>
   </view>
 
-  <view class="section panel">
-    <view class="row">
-      <view class="row-main">
-        <view class="label">今晚吃什么</view>
-        <view class="value">外卖推荐和转盘拍板</view>
-      </view>
-      <button class="button" bindtap="goMeals">进入</button>
-    </view>
-  </view>
-
   <view class="section">
-    <view class="panel">
-      <view class="label">天气</view>
-      <view class="value">{{weatherText}}</view>
+    <view class="panel" bindtap="goWeather">
+      <view class="row">
+        <view class="row-main">
+          <view class="label">天气</view>
+          <view class="value">{{weatherText}}</view>
+        </view>
+        <button class="button secondary">查看</button>
+      </view>
     </view>
     <view class="panel card-gap">
       <view class="row">
@@ -44,6 +58,24 @@
           <view class="value">{{waterText}}</view>
         </view>
         <button class="button secondary" bindtap="goWater">进入</button>
+      </view>
+    </view>
+    <view class="panel card-gap">
+      <view class="row">
+        <view class="row-main">
+          <view class="label">待办</view>
+          <view class="value">{{todoText}}</view>
+        </view>
+        <button class="button secondary" bindtap="goTodos">进入</button>
+      </view>
+    </view>
+    <view class="panel card-gap">
+      <view class="row">
+        <view class="row-main">
+          <view class="label">纪念日</view>
+          <view class="value">{{anniversaryText}}</view>
+        </view>
+        <button class="button secondary" bindtap="goAnniversaries">进入</button>
       </view>
     </view>
     <view class="panel card-gap">

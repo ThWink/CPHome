@@ -38,6 +38,8 @@ describe("database migrations", () => {
       expect(tables).toContain("expenses");
       expect(tables).toContain("parcels");
       expect(tables).toContain("water_drinks");
+      expect(tables).toContain("todos");
+      expect(tables).toContain("anniversaries");
 
       const mealColumns = database.sqlite
         .prepare("pragma table_info(meal_records)")

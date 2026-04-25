@@ -22,8 +22,12 @@ const app = readJson("app.json");
 const expectedPages = [
   "pages/home/index",
   "pages/setup/index",
+  "pages/weather/index",
+  "pages/assistant/index",
   "pages/meals/index",
   "pages/water/index",
+  "pages/todos/index",
+  "pages/anniversaries/index",
   "pages/parcels/index",
   "pages/expenses/index",
   "pages/settings/index"

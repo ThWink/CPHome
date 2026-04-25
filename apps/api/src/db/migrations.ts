@@ -135,5 +135,31 @@ export function runMigrations(sqlite: SqliteDatabase): void {
 
     create index if not exists idx_water_drinks_today
       on water_drinks(occurred_on, person);
+
+    create table if not exists todos (
+      id text primary key,
+      title text not null,
+      assignee text not null check (assignee in ('self', 'partner', 'both')),
+      due_on text,
+      status text not null default 'open' check (status in ('open', 'done')),
+      created_at text not null default CURRENT_TIMESTAMP,
+      updated_at text not null default CURRENT_TIMESTAMP
+    );
+
+    create table if not exists anniversaries (
+      id text primary key,
+      title text not null,
+      date text not null,
+      repeat text not null check (repeat in ('none', 'yearly')),
+      remind_days_before integer not null default 0 check (remind_days_before >= 0 and remind_days_before <= 30),
+      created_at text not null default CURRENT_TIMESTAMP,
+      updated_at text not null default CURRENT_TIMESTAMP
+    );
+
+    create index if not exists idx_todos_status_due
+      on todos(status, due_on);
+
+    create index if not exists idx_anniversaries_date
+      on anniversaries(date);
   `);
 }

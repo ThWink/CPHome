@@ -1,0 +1,27 @@
+<view class="page">
+  <view class="title">两人待办</view>
+  <view class="subtitle">{{statusText}}</view>
+
+  <view class="section panel">
+    <view class="label">待办内容</view>
+    <input class="input" value="{{title}}" bindinput="onTitleInput" placeholder="比如 下班带牛奶" />
+    <view class="field-gap">
+      <view class="label">日期</view>
+      <input class="input" value="{{dueOn}}" bindinput="onDueOnInput" placeholder="2026-04-25" />
+    </view>
+    <button class="button action-gap" bindtap="createTodo">加入今天</button>
+  </view>
+
+  <view class="section">
+    <view wx:for="{{todos}}" wx:key="id" class="panel todo-card">
+      <view class="row">
+        <view class="row-main">
+          <view class="label">{{item.dueOn || "不限定日期"}}</view>
+          <view class="value">{{item.title}}</view>
+          <view class="subtitle">两个人都能看到</view>
+        </view>
+        <button class="button secondary" data-id="{{item.id}}" bindtap="markDone">完成</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,17 @@
+.field-gap {
+  margin-top: 22rpx;
+}
+
+.action-gap {
+  margin-top: 24rpx;
+}
+
+.anniversary-card {
+  margin-bottom: 18rpx;
+  border-color: #f0c9bd;
+  background: #fffaf7;
+}
+
+.anniversary-card .value {
+  color: #7a3d2d;
+}
