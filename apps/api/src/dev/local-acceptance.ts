@@ -67,6 +67,15 @@ interface ExpenseSummaryResponse {
   };
 }
 
+interface BackupExportResponse {
+  backup?: {
+    version?: unknown;
+    exportedAt?: unknown;
+    tableCounts?: unknown;
+    tables?: unknown;
+  };
+}
+
 interface AssistantResponse {
   reply?: unknown;
   source?: unknown;
@@ -342,6 +351,21 @@ export async function runLocalAcceptance(
       Array.isArray(summary.byPayer)
       ? pass("expense summary", "monthly expense summary is available")
       : fail("expense summary", `expense summary failed, got HTTP ${response.status}`);
+  })) {
+    return finish(checks);
+  }
+
+  if (!await appendCheck(checks, async () => {
+    const response = await readJson<BackupExportResponse>("/api/backup/export", options);
+    const backup = response.body.backup;
+
+    return response.status === 200 &&
+      backup?.version === 1 &&
+      typeof backup.exportedAt === "string" &&
+      typeof backup.tableCounts === "object" &&
+      typeof backup.tables === "object"
+      ? pass("backup export", "local data can be exported")
+      : fail("backup export", `backup export failed, got HTTP ${response.status}`);
   })) {
     return finish(checks);
   }

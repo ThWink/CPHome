@@ -21,6 +21,13 @@
     <button class="button secondary action-gap" bindtap="checkHealth">检查后端</button>
   </view>
 
+  <view class="section panel">
+    <view class="label">本地数据备份</view>
+    <view class="value">{{backupText}}</view>
+    <view class="hint">导出内容会复制到剪贴板，包含本实例的业务数据，迁移前可以先保存。</view>
+    <button class="button secondary action-gap" bindtap="copyBackup">复制备份 JSON</button>
+  </view>
+
   <view class="section">
     <view class="row">
       <view>

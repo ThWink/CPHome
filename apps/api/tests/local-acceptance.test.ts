@@ -88,6 +88,21 @@ describe("local acceptance verifier", () => {
         });
       }
 
+      if (url.endsWith("/api/backup/export")) {
+        return jsonResponse({
+          backup: {
+            version: 1,
+            exportedAt: "2026-04-25T00:00:00.000Z",
+            tableCounts: {
+              expenses: 1
+            },
+            tables: {
+              expenses: [{ id: "expense1" }]
+            }
+          }
+        });
+      }
+
       if (url.endsWith("/api/assistant/chat")) {
         return jsonResponse({ reply: "今天有待办和快递", source: "local" });
       }
@@ -113,6 +128,7 @@ describe("local acceptance verifier", () => {
       "meal memories",
       "meal requests",
       "expense summary",
+      "backup export",
       "assistant"
     ]);
     expect(requests.every((request) => request.url.startsWith("http://127.0.0.1:3000/"))).toBe(true);

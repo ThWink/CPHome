@@ -15,5 +15,10 @@ declare const wx: {
     fail?: (error: unknown) => void;
   }): void;
   showToast(options: { title: string; icon?: "success" | "error" | "loading" | "none" }): void;
+  setClipboardData(options: {
+    data: string;
+    success?: () => void;
+    fail?: (error: unknown) => void;
+  }): void;
   navigateTo(options: { url: string }): void;
 };

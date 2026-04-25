@@ -4,6 +4,7 @@ import { getEnv, type AppEnv } from "../config/env.js";
 import { openDatabase, type AppDatabase } from "../db/client.js";
 import { runMigrations } from "../db/migrations.js";
 import { createLlmClient, type LlmClient } from "../features/assistant/llm-client.js";
+import { registerBackupRoutes } from "../features/backup/backup-routes.js";
 import { registerLifeRoutes } from "../features/life/life-routes.js";
 import { registerMealRoutes } from "../features/meals/meal-routes.js";
 import { registerSetupRoutes } from "../features/setup/setup-routes.js";
@@ -48,6 +49,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await registerHealthRoutes(app, { database });
   await registerSetupRoutes(app, { database });
   await registerMealRoutes(app, { database });
+  await registerBackupRoutes(app, { database });
   const weatherClient = options.weatherClient === undefined
     ? env.NODE_ENV === "test"
       ? null

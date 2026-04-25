@@ -43,6 +43,15 @@ interface PreferencesResponse {
   preferences: TastePreference[];
 }
 
+interface BackupExportResponse {
+  backup: {
+    version: number;
+    exportedAt: string;
+    tableCounts: Record<string, number>;
+    tables: Record<string, unknown[]>;
+  };
+}
+
 const sentimentLabels: Record<TastePreference["sentiment"], string> = {
   like: "喜欢",
   dislike: "少推荐",
@@ -55,6 +64,7 @@ Page({
     apiToken: "",
     healthText: "未检查",
     memoryText: "未加载",
+    backupText: "还没有生成备份",
     memories: [] as Array<MealMemory & { itemText: string }>,
     preferences: [] as Array<TastePreference & { sentimentText: string }>
   },
@@ -142,5 +152,34 @@ Page({
 
     wx.showToast({ title: "已删除", icon: "success" });
     void this.loadMemoryData();
+  },
+
+  async copyBackup() {
+    const response = await requestApi<BackupExportResponse>("/api/backup/export");
+    if (!response.ok || !response.data) {
+      this.setData({
+        backupText: response.statusCode === 401 ? "Token 未填写或不正确" : "备份接口未连接"
+      });
+      wx.showToast({ title: "备份失败", icon: "none" });
+      return;
+    }
+
+    const backupText = JSON.stringify(response.data.backup, null, 2);
+    const tableTotal = Object.values(response.data.backup.tableCounts)
+      .reduce((sum, count) => sum + count, 0);
+
+    wx.setClipboardData({
+      data: backupText,
+      success: () => {
+        this.setData({
+          backupText: `已复制 ${tableTotal} 条数据，导出时间 ${response.data?.backup.exportedAt ?? ""}`
+        });
+        wx.showToast({ title: "备份已复制", icon: "success" });
+      },
+      fail: () => {
+        this.setData({ backupText: "备份已生成，但复制失败" });
+        wx.showToast({ title: "复制失败", icon: "none" });
+      }
+    });
   }
 });
