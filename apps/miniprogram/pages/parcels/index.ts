@@ -1,11 +1,13 @@
 import { requestApi } from "../../utils/request";
 
+type ParcelOwner = "self" | "partner" | "both";
+
 interface Parcel {
   id: string;
   title: string;
   pickupCode: string;
   location: string;
-  owner: "self" | "partner" | "both";
+  owner: ParcelOwner;
   status: "pending" | "picked" | "canceled";
   note: string | null;
 }
@@ -14,13 +16,27 @@ interface ParcelsResponse {
   parcels: Parcel[];
 }
 
+const ownerOptions: Array<{ value: ParcelOwner; label: string }> = [
+  { value: "self", label: "我的" },
+  { value: "partner", label: "对方的" },
+  { value: "both", label: "共同的" }
+];
+
+const ownerLabels: Record<ParcelOwner, string> = {
+  self: "我的",
+  partner: "对方的",
+  both: "共同的"
+};
+
 Page({
   data: {
     title: "",
     pickupCode: "",
     location: "",
     note: "",
-    parcels: [] as Parcel[],
+    selectedOwner: "both" as ParcelOwner,
+    ownerOptions,
+    parcels: [] as Array<Parcel & { ownerText: string }>,
     statusText: "发布待取快递，方便对方顺手拿"
   },
 
@@ -48,6 +64,13 @@ Page({
     this.setData({ note: event.detail.value });
   },
 
+  selectOwner(event: { currentTarget: { dataset: { owner?: ParcelOwner } } }) {
+    const owner = event.currentTarget.dataset.owner;
+    if (owner) {
+      this.setData({ selectedOwner: owner });
+    }
+  },
+
   async loadParcels() {
     const response = await requestApi<ParcelsResponse>("/api/parcels/pending");
     if (!response.ok || !response.data) {
@@ -56,7 +79,10 @@ Page({
     }
 
     this.setData({
-      parcels: response.data.parcels,
+      parcels: response.data.parcels.map((parcel) => ({
+        ...parcel,
+        ownerText: ownerLabels[parcel.owner]
+      })),
       statusText: response.data.parcels.length > 0 ? "这些快递待取" : "暂无待取快递"
     });
   },
@@ -77,7 +103,7 @@ Page({
         title,
         pickupCode,
         location,
-        owner: "both",
+        owner: this.data.selectedOwner,
         note: `${this.data.note ?? ""}`.trim() || null
       }
     });
@@ -91,13 +117,21 @@ Page({
       title: "",
       pickupCode: "",
       location: "",
-      note: ""
+      note: "",
+      selectedOwner: "both"
     });
-    void this.loadParcels();
+    await this.loadParcels();
   },
 
   async markPicked(event: { currentTarget: { dataset: { id?: string } } }) {
-    const id = event.currentTarget.dataset.id;
+    await this.updateStatus(event.currentTarget.dataset.id, "picked");
+  },
+
+  async cancelParcel(event: { currentTarget: { dataset: { id?: string } } }) {
+    await this.updateStatus(event.currentTarget.dataset.id, "canceled");
+  },
+
+  async updateStatus(id: string | undefined, status: "picked" | "canceled") {
     if (!id) {
       return;
     }
@@ -105,7 +139,7 @@ Page({
     const response = await requestApi(`/api/parcels/${id}/status`, {
       method: "PATCH",
       data: {
-        status: "picked"
+        status
       }
     });
 
@@ -114,6 +148,6 @@ Page({
       return;
     }
 
-    void this.loadParcels();
+    await this.loadParcels();
   }
 });

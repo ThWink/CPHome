@@ -45,7 +45,7 @@ Current local MVP pages:
 - Meals: takeout recommendations, roulette, and meal memory confirmation.
 - Weather: online weather with local fallback advice for takeout and errands.
 - Water: record today's drink counts and create/complete drink-water reminders.
-- Parcels: publish pending parcels and mark them picked.
+- Parcels: publish parcels with ownership, mark them picked, or cancel mistaken entries.
 - Expenses: record categorized shared expenses with payer selection and monthly summary.
 - Todos: create and complete shared daily tasks.
 - Anniversaries: track upcoming important dates.

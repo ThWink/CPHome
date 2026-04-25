@@ -5,30 +5,50 @@
   <view class="section panel">
     <view class="label">快递名</view>
     <input class="input" value="{{title}}" bindinput="onTitleInput" placeholder="比如 京东快递" />
+
     <view class="field-gap">
       <view class="label">取件码</view>
       <input class="input" value="{{pickupCode}}" bindinput="onPickupCodeInput" placeholder="A-1024" />
     </view>
+
     <view class="field-gap">
       <view class="label">位置</view>
       <input class="input" value="{{location}}" bindinput="onLocationInput" placeholder="楼下驿站" />
     </view>
+
+    <view class="field-gap">
+      <view class="label">归属</view>
+      <view class="owner-grid">
+        <view
+          wx:for="{{ownerOptions}}"
+          wx:key="value"
+          data-owner="{{item.value}}"
+          bindtap="selectOwner"
+          class="owner-chip {{selectedOwner === item.value ? 'active' : ''}}"
+        >{{item.label}}</view>
+      </view>
+    </view>
+
     <view class="field-gap">
       <view class="label">备注</view>
-      <input class="input" value="{{note}}" bindinput="onNoteInput" placeholder="下班顺手拿" />
+      <input class="input" value="{{note}}" bindinput="onNoteInput" placeholder="下班顺手拿、冷藏件" />
     </view>
+
     <button class="button action-gap" bindtap="createParcel">发布快递</button>
   </view>
 
   <view class="section">
     <view wx:for="{{parcels}}" wx:key="id" class="panel parcel-card">
-      <view class="row">
+      <view class="row parcel-row">
         <view class="row-main">
-          <view class="label">{{item.location}}</view>
+          <view class="label">{{item.location}} · {{item.ownerText}}</view>
           <view class="value">{{item.title}}</view>
           <view class="subtitle">取件码 {{item.pickupCode}}{{item.note ? " · " + item.note : ""}}</view>
         </view>
-        <button class="button secondary" data-id="{{item.id}}" bindtap="markPicked">已取</button>
+        <view class="parcel-actions">
+          <button class="button secondary action-button" data-id="{{item.id}}" bindtap="markPicked">已取</button>
+          <button class="button soft action-button" data-id="{{item.id}}" bindtap="cancelParcel">取消</button>
+        </view>
       </view>
     </view>
   </view>
