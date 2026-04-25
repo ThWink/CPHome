@@ -8,6 +8,36 @@ Open-source self-hosted WeChat Mini Program for one cohabiting couple. The first
 - `apps/miniprogram`: WeChat Mini Program source.
 - `packages/shared`: Shared TypeScript contracts.
 
+## Local Run
+
+From the repository root:
+
+```powershell
+corepack pnpm install
+corepack pnpm local:start
+corepack pnpm verify:local
+```
+
+The API will be available at:
+
+```text
+http://127.0.0.1:3000
+```
+
+Open the Mini Program project in WeChat DevTools:
+
+```text
+apps/miniprogram
+```
+
+The Mini Program defaults to `http://127.0.0.1:3000` in local development. Use the Settings page if you need to switch to a LAN IP.
+
+To stop the local API:
+
+```powershell
+corepack pnpm local:stop
+```
+
 ## Development
 
 ```bash

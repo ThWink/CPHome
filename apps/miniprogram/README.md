@@ -10,6 +10,12 @@ Open this directory in WeChat DevTools:
 apps/miniprogram
 ```
 
+Start the local API from the repository root:
+
+```powershell
+corepack pnpm local:start
+```
+
 Use the Settings page in the Mini Program to configure the API base URL. During local development it defaults to:
 
 ```text
@@ -34,7 +40,7 @@ corepack pnpm --filter @couple-life/api seed:demo
 
 Then verify the local backend flow before opening WeChat DevTools:
 
-```bash
+```powershell
 corepack pnpm verify:local
 ```
 
