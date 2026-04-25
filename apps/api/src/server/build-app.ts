@@ -3,6 +3,7 @@ import Fastify, { type FastifyInstance } from "fastify";
 import { getEnv, type AppEnv } from "../config/env.js";
 import { openDatabase, type AppDatabase } from "../db/client.js";
 import { runMigrations } from "../db/migrations.js";
+import { registerLifeRoutes } from "../features/life/life-routes.js";
 import { registerMealRoutes } from "../features/meals/meal-routes.js";
 import { registerSetupRoutes } from "../features/setup/setup-routes.js";
 import { registerHealthRoutes } from "./health-routes.js";
@@ -39,6 +40,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await registerHealthRoutes(app, { database });
   await registerSetupRoutes(app, { database });
   await registerMealRoutes(app, { database });
+  await registerLifeRoutes(app, { database });
 
   return app;
 }

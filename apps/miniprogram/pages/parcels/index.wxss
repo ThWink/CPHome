@@ -1,0 +1,13 @@
+.field-gap,
+.action-gap {
+  margin-top: 22rpx;
+}
+
+.parcel-card {
+  margin-bottom: 18rpx;
+}
+
+.row-main {
+  min-width: 0;
+  flex: 1;
+}

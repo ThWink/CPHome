@@ -1,0 +1,16 @@
+.field-gap,
+.action-gap {
+  margin-top: 22rpx;
+}
+
+.expense-card {
+  margin-bottom: 18rpx;
+}
+
+.amount {
+  min-width: 150rpx;
+  color: #2f6f62;
+  font-size: 34rpx;
+  font-weight: 700;
+  text-align: right;
+}

@@ -96,5 +96,44 @@ export function runMigrations(sqlite: SqliteDatabase): void {
 
     create index if not exists idx_taste_preferences_lookup
       on taste_preferences(person, category, value);
+
+    create table if not exists expenses (
+      id text primary key,
+      occurred_on text not null,
+      category text not null check (category in ('takeout', 'groceries', 'daily', 'rent', 'utilities', 'transport', 'entertainment', 'other')),
+      payer text not null check (payer in ('self', 'partner', 'both')),
+      amount_cents integer not null check (amount_cents >= 0),
+      note text,
+      created_at text not null default CURRENT_TIMESTAMP
+    );
+
+    create table if not exists parcels (
+      id text primary key,
+      title text not null,
+      pickup_code text not null,
+      location text not null,
+      owner text not null check (owner in ('self', 'partner', 'both')),
+      status text not null default 'pending' check (status in ('pending', 'picked', 'canceled')),
+      note text,
+      created_at text not null default CURRENT_TIMESTAMP,
+      updated_at text not null default CURRENT_TIMESTAMP
+    );
+
+    create table if not exists water_drinks (
+      id text primary key,
+      person text not null check (person in ('self', 'partner', 'both')),
+      occurred_on text not null,
+      amount_ml integer not null check (amount_ml >= 0),
+      created_at text not null default CURRENT_TIMESTAMP
+    );
+
+    create index if not exists idx_expenses_occurred_on
+      on expenses(occurred_on);
+
+    create index if not exists idx_parcels_status
+      on parcels(status, updated_at);
+
+    create index if not exists idx_water_drinks_today
+      on water_drinks(occurred_on, person);
   `);
 }

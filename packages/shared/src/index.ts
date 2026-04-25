@@ -31,3 +31,24 @@ export {
   parsePreferenceInput,
   parseRecommendationRequest
 } from "./meal.js";
+
+export type {
+  DashboardToday,
+  Expense,
+  ExpenseCategory,
+  ExpenseInput,
+  Parcel,
+  ParcelInput,
+  ParcelStatus,
+  ParcelStatusInput,
+  WaterDrink,
+  WaterDrinkInput,
+  WaterTodaySummary
+} from "./life.js";
+
+export {
+  parseExpenseInput,
+  parseParcelInput,
+  parseParcelStatusInput,
+  parseWaterDrinkInput
+} from "./life.js";

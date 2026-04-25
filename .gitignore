@@ -11,3 +11,5 @@ data/
 *.db-wal
 .DS_Store
 Thumbs.db
+apps/miniprogram/**/*.js
+apps/miniprogram/project.private.config.json

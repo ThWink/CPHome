@@ -23,3 +23,12 @@ http://192.168.1.10:3000
 ```
 
 After the API address is reachable, open the home page and enter the setup page to initialize the one-couple deployment.
+
+Current local MVP pages:
+
+- Home: backend status, binding status, dashboard cards.
+- Setup: initialize the one-couple deployment.
+- Meals: takeout recommendations, roulette, and meal memory confirmation.
+- Water: record today's drink counts for both people.
+- Parcels: publish pending parcels and mark them picked.
+- Expenses: record recent shared takeout expenses.

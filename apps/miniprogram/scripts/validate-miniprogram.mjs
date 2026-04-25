@@ -23,6 +23,9 @@ const expectedPages = [
   "pages/home/index",
   "pages/setup/index",
   "pages/meals/index",
+  "pages/water/index",
+  "pages/parcels/index",
+  "pages/expenses/index",
   "pages/settings/index"
 ];
 

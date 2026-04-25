@@ -35,6 +35,9 @@ describe("database migrations", () => {
       expect(tables).toContain("taste_preferences");
       expect(tables).toContain("meal_memory_entries");
       expect(tables).toContain("memory_embeddings");
+      expect(tables).toContain("expenses");
+      expect(tables).toContain("parcels");
+      expect(tables).toContain("water_drinks");
 
       const mealColumns = database.sqlite
         .prepare("pragma table_info(meal_records)")

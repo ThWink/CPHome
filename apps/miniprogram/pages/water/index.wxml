@@ -1,0 +1,16 @@
+<view class="page">
+  <view class="title">喝水</view>
+  <view class="subtitle">{{statusText}}</view>
+
+  <view class="section panel">
+    <view class="label">我</view>
+    <view class="value">{{selfText}}</view>
+    <button class="button action-gap" bindtap="addSelfDrink">我喝了一杯</button>
+  </view>
+
+  <view class="section panel">
+    <view class="label">对方</view>
+    <view class="value">{{partnerText}}</view>
+    <button class="button secondary action-gap" bindtap="addPartnerDrink">提醒后记录一杯</button>
+  </view>
+</view>
