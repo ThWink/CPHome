@@ -9,6 +9,7 @@ declare const wx: {
     url: string;
     method?: string;
     data?: unknown;
+    header?: Record<string, string>;
     timeout?: number;
     success?: (response: { statusCode: number; data: unknown }) => void;
     fail?: (error: unknown) => void;

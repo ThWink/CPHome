@@ -12,6 +12,7 @@ interface AppGlobals {
 }
 
 const apiBaseUrlKey = "apiBaseUrl";
+const apiTokenKey = "apiToken";
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
@@ -33,12 +34,26 @@ export function setApiBaseUrl(value: string): string {
   return normalized;
 }
 
+export function getApiToken(): string {
+  const stored = wx.getStorageSync(apiTokenKey);
+  return typeof stored === "string" ? stored.trim() : "";
+}
+
+export function setApiToken(value: string): string {
+  const normalized = value.trim();
+  wx.setStorageSync(apiTokenKey, normalized);
+  return normalized;
+}
+
 export function requestApi<T>(path: string, options: { method?: string; data?: unknown } = {}): Promise<ApiResponse<T>> {
+  const apiToken = getApiToken();
+
   return new Promise((resolve) => {
     wx.request({
       url: `${getApiBaseUrl()}${path}`,
       method: options.method ?? "GET",
       data: options.data,
+      header: apiToken.length > 0 ? { "x-couple-api-token": apiToken } : {},
       timeout: 8000,
       success(response) {
         const ok = response.statusCode >= 200 && response.statusCode < 300;

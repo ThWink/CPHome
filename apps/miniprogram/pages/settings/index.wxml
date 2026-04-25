@@ -9,6 +9,13 @@
   </view>
 
   <view class="section panel">
+    <view class="label">访问 Token</view>
+    <input class="input" password value="{{apiToken}}" bindinput="onApiTokenInput" placeholder="和后端 API_TOKEN 保持一致" />
+    <view class="hint">本地开发可留空；部署到香橙派时建议填写。</view>
+    <button class="button action-gap" bindtap="saveApiToken">保存 Token</button>
+  </view>
+
+  <view class="section panel">
     <view class="label">健康检查</view>
     <view class="value">{{healthText}}</view>
     <button class="button secondary action-gap" bindtap="checkHealth">检查后端</button>

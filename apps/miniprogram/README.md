@@ -22,6 +22,8 @@ When testing on a phone, use the LAN address of the machine or Orange Pi running
 http://192.168.1.10:3000
 ```
 
+If the backend has `API_TOKEN` configured, enter the same token on the Settings page before using data pages.
+
 After the API address is reachable, open the home page and enter the setup page to initialize the one-couple deployment.
 
 For a clean local walkthrough, seed readable demo data from the repo root:
@@ -42,4 +44,4 @@ Current local MVP pages:
 - Todos: create and complete shared daily tasks.
 - Anniversaries: track upcoming important dates.
 - Assistant: ask the local life assistant, with optional LLM provider support from the API.
-- Settings: API address, health check, AI memory and taste preference management.
+- Settings: API address, API token, health check, AI memory and taste preference management.

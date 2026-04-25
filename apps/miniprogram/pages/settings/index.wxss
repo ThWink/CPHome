@@ -2,6 +2,13 @@
   margin-top: 20rpx;
 }
 
+.hint {
+  margin-top: 12rpx;
+  color: #8a7663;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
 .compact-button {
   min-width: 112rpx;
   height: 60rpx;

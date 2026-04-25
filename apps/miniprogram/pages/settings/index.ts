@@ -1,4 +1,10 @@
-import { getApiBaseUrl, requestApi, setApiBaseUrl } from "../../utils/request";
+import {
+  getApiBaseUrl,
+  getApiToken,
+  requestApi,
+  setApiBaseUrl,
+  setApiToken
+} from "../../utils/request";
 
 interface ReadyResponse {
   status: string;
@@ -46,6 +52,7 @@ const sentimentLabels: Record<TastePreference["sentiment"], string> = {
 Page({
   data: {
     apiBaseUrl: "",
+    apiToken: "",
     healthText: "未检查",
     memoryText: "未加载",
     memories: [] as Array<MealMemory & { itemText: string }>,
@@ -53,7 +60,10 @@ Page({
   },
 
   onLoad() {
-    this.setData({ apiBaseUrl: getApiBaseUrl() });
+    this.setData({
+      apiBaseUrl: getApiBaseUrl(),
+      apiToken: getApiToken()
+    });
   },
 
   onShow() {
@@ -64,10 +74,20 @@ Page({
     this.setData({ apiBaseUrl: event.detail.value });
   },
 
+  onApiTokenInput(event: { detail: { value: string } }) {
+    this.setData({ apiToken: event.detail.value });
+  },
+
   saveApiBaseUrl() {
     const apiBaseUrl = setApiBaseUrl(`${this.data.apiBaseUrl ?? ""}`);
     this.setData({ apiBaseUrl });
     wx.showToast({ title: "已保存", icon: "success" });
+  },
+
+  saveApiToken() {
+    const apiToken = setApiToken(`${this.data.apiToken ?? ""}`);
+    this.setData({ apiToken });
+    wx.showToast({ title: apiToken.length > 0 ? "Token 已保存" : "Token 已清空", icon: "success" });
   },
 
   async checkHealth() {
@@ -84,7 +104,11 @@ Page({
     ]);
 
     if (!memoriesResponse.ok || !memoriesResponse.data || !preferencesResponse.ok || !preferencesResponse.data) {
-      this.setData({ memoryText: "记忆接口未连接" });
+      this.setData({
+        memoryText: memoriesResponse.statusCode === 401 || preferencesResponse.statusCode === 401
+          ? "Token 未填写或不正确"
+          : "记忆接口未连接"
+      });
       return;
     }
 
@@ -112,7 +136,7 @@ Page({
     });
 
     if (!response.ok) {
-      wx.showToast({ title: "删除失败", icon: "none" });
+      wx.showToast({ title: response.statusCode === 401 ? "Token 不正确" : "删除失败", icon: "none" });
       return;
     }
 

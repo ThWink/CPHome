@@ -5,6 +5,7 @@ const envSchema = z.object({
   HOST: z.string().default("0.0.0.0"),
   PORT: z.coerce.number().int().positive().default(3000),
   DATABASE_URL: z.string().default("file:./data/app.db"),
+  API_TOKEN: z.string().default(""),
   LLM_PROVIDER: z.enum(["disabled", "openai-compatible", "ollama"]).default("disabled"),
   LLM_BASE_URL: z.string().default("https://api.openai.com/v1"),
   LLM_API_KEY: z.string().optional(),
