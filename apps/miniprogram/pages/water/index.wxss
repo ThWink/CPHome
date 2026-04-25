@@ -13,13 +13,15 @@
 }
 
 .small-action {
-  height: 62rpx;
-  line-height: 62rpx;
+  min-height: 62rpx;
+  padding: 8rpx 12rpx;
+  font-size: 24rpx;
+  line-height: 1.25;
 }
 
 .refresh-button {
-  width: 132rpx;
-  min-width: 132rpx;
+  min-width: 120rpx;
+  max-width: 156rpx;
 }
 
 .reminder-title {
@@ -28,7 +30,7 @@
 
 .reminder-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 18rpx;
   margin-top: 22rpx;
@@ -38,6 +40,7 @@
 
 .reminder-main {
   min-width: 0;
+  flex: 1;
 }
 
 .reminder-message {
@@ -49,6 +52,7 @@
 }
 
 .done-button {
-  width: 120rpx;
-  min-width: 120rpx;
+  min-width: 116rpx;
+  max-width: 144rpx;
+  flex-shrink: 0;
 }

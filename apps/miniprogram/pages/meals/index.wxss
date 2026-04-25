@@ -9,6 +9,7 @@
   background: #efe7dc;
   color: #6c5c4c;
   font-size: 24rpx;
+  line-height: 1.25;
   text-align: center;
 }
 
@@ -21,7 +22,12 @@
 }
 
 .half {
-  width: 48%;
+  flex: 1 1 240rpx;
+  min-width: 220rpx;
+}
+
+.row.action-gap {
+  flex-wrap: wrap;
 }
 
 .preview {
@@ -35,8 +41,8 @@
 }
 
 .small-button {
-  width: 132rpx;
-  min-width: 132rpx;
+  min-width: 120rpx;
+  max-width: 156rpx;
 }
 
 .request-row {
@@ -58,12 +64,14 @@
   display: flex;
   flex-direction: column;
   gap: 12rpx;
-  width: 132rpx;
+  width: 144rpx;
+  flex-shrink: 0;
 }
 
 .action-button {
-  width: 132rpx;
-  height: 62rpx;
-  padding: 0;
-  line-height: 62rpx;
+  width: 144rpx;
+  min-height: 62rpx;
+  padding: 8rpx 10rpx;
+  font-size: 24rpx;
+  line-height: 1.25;
 }

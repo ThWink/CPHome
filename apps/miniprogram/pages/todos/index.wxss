@@ -25,14 +25,14 @@
 .assignee-chip {
   box-sizing: border-box;
   min-height: 62rpx;
-  padding: 0 12rpx;
+  padding: 12rpx;
   border: 1rpx solid #eadfd1;
   border-radius: 14rpx;
   background: #fffdf9;
   color: #6f6255;
   font-size: 24rpx;
   font-weight: 600;
-  line-height: 62rpx;
+  line-height: 1.25;
   text-align: center;
 }
 
@@ -44,5 +44,5 @@
 
 .picker-input {
   min-height: 76rpx;
-  line-height: 36rpx;
+  line-height: 1.4;
 }

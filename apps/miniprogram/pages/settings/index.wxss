@@ -11,10 +11,10 @@
 
 .compact-button {
   min-width: 112rpx;
-  height: 60rpx;
+  min-height: 60rpx;
   padding: 0 18rpx;
   font-size: 24rpx;
-  line-height: 60rpx;
+  line-height: 1.25;
 }
 
 .memory-card {
@@ -30,6 +30,7 @@
   display: flex;
   flex-direction: column;
   gap: 12rpx;
+  width: 132rpx;
   flex-shrink: 0;
 }
 
@@ -45,6 +46,7 @@
   color: #2b2520;
   font-size: 26rpx;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .backup-editor {
@@ -59,6 +61,7 @@
   color: #2b2520;
   font-size: 24rpx;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .danger {
@@ -68,7 +71,7 @@
 
 .preference-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 18rpx;
   padding: 20rpx 0;
@@ -88,11 +91,13 @@
 
 .preference-pill {
   min-width: 96rpx;
+  max-width: 160rpx;
   padding: 8rpx 14rpx;
   border-radius: 999rpx;
   background: #eef5ed;
   color: #2f6f62;
   font-size: 24rpx;
+  line-height: 1.25;
   text-align: center;
-  white-space: nowrap;
+  flex-shrink: 0;
 }

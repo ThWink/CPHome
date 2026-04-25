@@ -13,14 +13,14 @@
 .owner-chip {
   box-sizing: border-box;
   min-height: 62rpx;
-  padding: 0 12rpx;
+  padding: 12rpx;
   border: 1rpx solid #eadfd1;
   border-radius: 14rpx;
   background: #fffdf9;
   color: #6f6255;
   font-size: 24rpx;
   font-weight: 600;
-  line-height: 62rpx;
+  line-height: 1.25;
   text-align: center;
 }
 
@@ -47,12 +47,14 @@
   display: flex;
   flex-direction: column;
   gap: 12rpx;
-  width: 132rpx;
+  width: 144rpx;
+  flex-shrink: 0;
 }
 
 .action-button {
-  width: 132rpx;
-  height: 62rpx;
-  padding: 0;
-  line-height: 62rpx;
+  width: 144rpx;
+  min-height: 62rpx;
+  padding: 8rpx 10rpx;
+  font-size: 24rpx;
+  line-height: 1.25;
 }
