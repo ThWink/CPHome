@@ -47,7 +47,7 @@ Current local MVP pages:
 - Water: record today's drink counts and create/complete drink-water reminders.
 - Parcels: publish parcels with ownership, mark them picked, or cancel mistaken entries.
 - Expenses: record categorized shared expenses with payer selection and monthly summary.
-- Todos: create and complete shared daily tasks.
-- Anniversaries: track upcoming important dates.
+- Todos: create shared tasks with assignee and due date, then mark them complete.
+- Anniversaries: track one-time or yearly important dates with reminder days.
 - Assistant: ask the local life assistant, with optional LLM provider support from the API.
 - Settings: API address, API token, health check, AI memory and taste preference management.

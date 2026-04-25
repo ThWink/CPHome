@@ -5,20 +5,37 @@
   <view class="section panel">
     <view class="label">待办内容</view>
     <input class="input" value="{{title}}" bindinput="onTitleInput" placeholder="比如 下班带牛奶" />
+
+    <view class="field-gap">
+      <view class="label">负责人</view>
+      <view class="assignee-grid">
+        <view
+          wx:for="{{assigneeOptions}}"
+          wx:key="value"
+          data-assignee="{{item.value}}"
+          bindtap="selectAssignee"
+          class="assignee-chip {{selectedAssignee === item.value ? 'active' : ''}}"
+        >{{item.label}}</view>
+      </view>
+    </view>
+
     <view class="field-gap">
       <view class="label">日期</view>
-      <input class="input" value="{{dueOn}}" bindinput="onDueOnInput" placeholder="2026-04-25" />
+      <picker mode="date" value="{{dueOn}}" bindchange="onDueOnChange">
+        <view class="input picker-input">{{dueOn}}</view>
+      </picker>
     </view>
-    <button class="button action-gap" bindtap="createTodo">加入今天</button>
+
+    <button class="button action-gap" bindtap="createTodo">加入待办</button>
   </view>
 
   <view class="section">
     <view wx:for="{{todos}}" wx:key="id" class="panel todo-card">
       <view class="row">
         <view class="row-main">
-          <view class="label">{{item.dueOn || "不限定日期"}}</view>
+          <view class="label">{{item.dueOn || "不限日期"}} · {{item.assigneeText}}</view>
           <view class="value">{{item.title}}</view>
-          <view class="subtitle">两个人都能看到</view>
+          <view class="subtitle">完成后会从待办列表移除</view>
         </view>
         <button class="button secondary" data-id="{{item.id}}" bindtap="markDone">完成</button>
       </view>

@@ -1,10 +1,12 @@
 import { requestApi } from "../../utils/request";
 
+type AnniversaryRepeat = "none" | "yearly";
+
 interface UpcomingAnniversary {
   id: string;
   title: string;
   date: string;
-  repeat: "none" | "yearly";
+  repeat: AnniversaryRepeat;
   remindDaysBefore: number;
   nextOn: string;
   daysLeft: number;
@@ -14,16 +16,33 @@ interface AnniversariesResponse {
   anniversaries: UpcomingAnniversary[];
 }
 
+const repeatOptions: Array<{ value: AnniversaryRepeat; label: string }> = [
+  { value: "yearly", label: "每年提醒" },
+  { value: "none", label: "只提醒一次" }
+];
+
+const repeatLabels: Record<AnniversaryRepeat, string> = {
+  yearly: "每年",
+  none: "一次"
+};
+
+function pad(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  const date = new Date();
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 Page({
   data: {
     title: "",
     date: today(),
+    selectedRepeat: "yearly" as AnniversaryRepeat,
+    repeatOptions,
     remindDaysBeforeText: "7",
-    anniversaries: [] as UpcomingAnniversary[],
+    anniversaries: [] as Array<UpcomingAnniversary & { repeatText: string }>,
     statusText: "记录重要日子，提前提醒彼此"
   },
 
@@ -39,8 +58,15 @@ Page({
     this.setData({ title: event.detail.value });
   },
 
-  onDateInput(event: { detail: { value: string } }) {
+  onDateChange(event: { detail: { value: string } }) {
     this.setData({ date: event.detail.value });
+  },
+
+  selectRepeat(event: { currentTarget: { dataset: { repeat?: AnniversaryRepeat } } }) {
+    const repeat = event.currentTarget.dataset.repeat;
+    if (repeat) {
+      this.setData({ selectedRepeat: repeat });
+    }
   },
 
   onRemindInput(event: { detail: { value: string } }) {
@@ -55,7 +81,10 @@ Page({
     }
 
     this.setData({
-      anniversaries: response.data.anniversaries,
+      anniversaries: response.data.anniversaries.map((anniversary) => ({
+        ...anniversary,
+        repeatText: repeatLabels[anniversary.repeat]
+      })),
       statusText: response.data.anniversaries.length > 0 ? "最近的重要日子" : "还没有纪念日"
     });
   },
@@ -80,7 +109,7 @@ Page({
       data: {
         title,
         date,
-        repeat: "yearly",
+        repeat: this.data.selectedRepeat,
         remindDaysBefore
       }
     });
@@ -93,8 +122,9 @@ Page({
     this.setData({
       title: "",
       date: today(),
+      selectedRepeat: "yearly",
       remindDaysBeforeText: "7"
     });
-    void this.loadAnniversaries();
+    await this.loadAnniversaries();
   }
 });

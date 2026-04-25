@@ -1,9 +1,11 @@
 import { requestApi } from "../../utils/request";
 
+type Assignee = "self" | "partner" | "both";
+
 interface Todo {
   id: string;
   title: string;
-  assignee: "self" | "partner" | "both";
+  assignee: Assignee;
   dueOn: string | null;
   status: "open" | "done";
 }
@@ -12,15 +14,34 @@ interface TodosResponse {
   todos: Todo[];
 }
 
+const assigneeOptions: Array<{ value: Assignee; label: string }> = [
+  { value: "both", label: "共同" },
+  { value: "self", label: "我" },
+  { value: "partner", label: "对方" }
+];
+
+const assigneeLabels: Record<Assignee, string> = {
+  both: "共同",
+  self: "我",
+  partner: "对方"
+};
+
+function pad(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  const date = new Date();
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 Page({
   data: {
     title: "",
     dueOn: today(),
-    todos: [] as Todo[],
+    selectedAssignee: "both" as Assignee,
+    assigneeOptions,
+    todos: [] as Array<Todo & { assigneeText: string }>,
     statusText: "把今天要互相照应的事放在这里"
   },
 
@@ -36,8 +57,15 @@ Page({
     this.setData({ title: event.detail.value });
   },
 
-  onDueOnInput(event: { detail: { value: string } }) {
+  onDueOnChange(event: { detail: { value: string } }) {
     this.setData({ dueOn: event.detail.value });
+  },
+
+  selectAssignee(event: { currentTarget: { dataset: { assignee?: Assignee } } }) {
+    const assignee = event.currentTarget.dataset.assignee;
+    if (assignee) {
+      this.setData({ selectedAssignee: assignee });
+    }
   },
 
   async loadTodos() {
@@ -48,7 +76,10 @@ Page({
     }
 
     this.setData({
-      todos: response.data.todos,
+      todos: response.data.todos.map((todo) => ({
+        ...todo,
+        assigneeText: assigneeLabels[todo.assignee]
+      })),
       statusText: response.data.todos.length > 0 ? "这些事还没完成" : "今天暂时没有待办"
     });
   },
@@ -66,7 +97,7 @@ Page({
       method: "POST",
       data: {
         title,
-        assignee: "both",
+        assignee: this.data.selectedAssignee,
         dueOn: dueOn || null
       }
     });
@@ -78,9 +109,10 @@ Page({
 
     this.setData({
       title: "",
-      dueOn: today()
+      dueOn: today(),
+      selectedAssignee: "both"
     });
-    void this.loadTodos();
+    await this.loadTodos();
   },
 
   async markDone(event: { currentTarget: { dataset: { id?: string } } }) {
@@ -101,6 +133,6 @@ Page({
       return;
     }
 
-    void this.loadTodos();
+    await this.loadTodos();
   }
 });

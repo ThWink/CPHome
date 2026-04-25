@@ -14,3 +14,35 @@
 .todo-card .value {
   color: #273f36;
 }
+
+.assignee-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14rpx;
+  margin-top: 14rpx;
+}
+
+.assignee-chip {
+  box-sizing: border-box;
+  min-height: 62rpx;
+  padding: 0 12rpx;
+  border: 1rpx solid #eadfd1;
+  border-radius: 14rpx;
+  background: #fffdf9;
+  color: #6f6255;
+  font-size: 24rpx;
+  font-weight: 600;
+  line-height: 62rpx;
+  text-align: center;
+}
+
+.assignee-chip.active {
+  border-color: #2f6f62;
+  background: #eaf4e7;
+  color: #2f6f62;
+}
+
+.picker-input {
+  min-height: 76rpx;
+  line-height: 36rpx;
+}
