@@ -160,6 +160,52 @@ describe("local MVP routes", () => {
       expect(response.json().reply).toContain("待办 1 个");
       expect(response.json().reply).toContain("想吃请求 1 个");
       expect(response.json().reply).not.toContain("：，");
+      expect(response.json().source).toBe("local");
+      expect(response.json().assistant).toMatchObject({
+        provider: "disabled",
+        enabled: false
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("returns assistant connection status", async () => {
+    const app = await buildApp({
+      databaseUrl: ":memory:",
+      env: {
+        NODE_ENV: "test",
+        HOST: "0.0.0.0",
+        PORT: 3000,
+        DATABASE_URL: "file:./data/app.db",
+        API_TOKEN: "",
+        LLM_PROVIDER: "openai-compatible",
+        LLM_BASE_URL: "https://llm.example.com/v1",
+        LLM_API_KEY: "test-key",
+        LLM_MODEL: "test-model",
+        LLM_REQUEST_TIMEOUT_MS: 15_000,
+        OLLAMA_BASE_URL: "http://127.0.0.1:11434",
+        WEATHER_PROVIDER: "disabled",
+        WEATHER_DEFAULT_CITY: "南昌"
+      }
+    });
+
+    try {
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/assistant/status"
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toMatchObject({
+        assistant: {
+          provider: "openai-compatible",
+          model: "test-model",
+          enabled: true,
+          configured: true,
+          endpoint: "https://llm.example.com/v1"
+        }
+      });
     } finally {
       await app.close();
     }
@@ -189,6 +235,7 @@ describe("local MVP routes", () => {
       expect(response.statusCode).toBe(200);
       expect(response.json().reply).toBe("模型回复：今晚少吃辣，记得拿快递。");
       expect(response.json().source).toBe("llm");
+      expect(response.json().assistant.enabled).toBe(true);
     } finally {
       await app.close();
     }

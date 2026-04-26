@@ -22,6 +22,25 @@
   </view>
 
   <view class="section panel">
+    <view class="row">
+      <view>
+        <view class="label">AI 助手接入</view>
+        <view class="value">{{assistantProviderText}}</view>
+      </view>
+      <button class="button secondary compact-button" bindtap="checkAssistantStatus">刷新</button>
+    </view>
+    <view class="hint">{{assistantStatusText}}</view>
+    <view wx:if="{{assistantModelText}}" class="setting-meta-row">
+      <view class="setting-meta-label">模型</view>
+      <view class="setting-meta-value">{{assistantModelText}}</view>
+    </view>
+    <view wx:if="{{assistantEndpointText}}" class="setting-meta-row">
+      <view class="setting-meta-label">地址</view>
+      <view class="setting-meta-value">{{assistantEndpointText}}</view>
+    </view>
+  </view>
+
+  <view class="section panel">
     <view class="label">本地数据备份</view>
     <view class="value">{{backupText}}</view>
     <view class="hint">导出内容会复制到剪贴板，包含本实例的业务数据，迁移前可以先保存。</view>

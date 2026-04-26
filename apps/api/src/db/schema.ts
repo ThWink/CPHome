@@ -96,6 +96,7 @@ export const parcels = sqliteTable("parcels", {
   owner: text("owner", { enum: ["self", "partner", "both"] }).notNull(),
   status: text("status", { enum: ["pending", "picked", "canceled"] }).notNull(),
   note: text("note"),
+  imagePath: text("image_path"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`)
 });

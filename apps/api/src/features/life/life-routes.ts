@@ -1,4 +1,8 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import type { FastifyInstance } from "fastify";
+import { nanoid } from "nanoid";
+import type { AssistantChatResponse, AssistantStatus } from "@couple-life/shared";
 import type { AppDatabase } from "../../db/client.js";
 import type { LlmClient, LlmMessage } from "../assistant/llm-client.js";
 import type { WeatherClient } from "../weather/weather-client.js";
@@ -29,7 +33,93 @@ import { listLifeEvents } from "./timeline-repository.js";
 export interface LifeRouteOptions {
   database: AppDatabase;
   llmClient?: LlmClient | null;
+  assistantStatus?: AssistantStatus;
   weatherClient?: WeatherClient | null;
+  parcelImageDir?: string;
+}
+
+const parcelImageMediaTypes = {
+  "image/jpeg": { extension: "jpg", contentType: "image/jpeg" },
+  "image/png": { extension: "png", contentType: "image/png" },
+  "image/webp": { extension: "webp", contentType: "image/webp" }
+} as const;
+
+type ParcelImageMediaType = keyof typeof parcelImageMediaTypes;
+
+function getRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null
+    ? value as Record<string, unknown>
+    : {};
+}
+
+function normalizeBase64Image(value: unknown): Buffer {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error("dataBase64 is required");
+  }
+
+  const normalized = value.includes(",")
+    ? value.slice(value.lastIndexOf(",") + 1).trim()
+    : value.trim();
+
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(normalized)) {
+    throw new Error("dataBase64 must be valid base64");
+  }
+
+  const buffer = Buffer.from(normalized, "base64");
+  if (buffer.length === 0) {
+    throw new Error("image cannot be empty");
+  }
+
+  if (buffer.length > 5 * 1024 * 1024) {
+    throw new Error("image must be 5MB or smaller");
+  }
+
+  return buffer;
+}
+
+function normalizeParcelImageMediaType(value: unknown): ParcelImageMediaType {
+  if (
+    typeof value === "string" &&
+    Object.hasOwn(parcelImageMediaTypes, value)
+  ) {
+    return value as ParcelImageMediaType;
+  }
+
+  throw new Error("mediaType is invalid");
+}
+
+function getParcelImageFileName(params: unknown): string {
+  const record = getRecord(params);
+  const fileName = record.fileName;
+
+  if (typeof fileName !== "string" || !/^[A-Za-z0-9_-]+\.(jpg|png|webp)$/.test(fileName)) {
+    throw new Error("image file name is invalid");
+  }
+
+  return fileName;
+}
+
+function getParcelImageContentType(fileName: string): string {
+  if (fileName.endsWith(".png")) {
+    return "image/png";
+  }
+
+  if (fileName.endsWith(".webp")) {
+    return "image/webp";
+  }
+
+  return "image/jpeg";
+}
+
+function getDefaultAssistantStatus(): AssistantStatus {
+  return {
+    provider: "disabled",
+    model: "local-summary",
+    enabled: false,
+    configured: false,
+    endpoint: null,
+    message: "未启用模型，AI 小管家会使用本地摘要。"
+  };
 }
 
 function getQueryDate(query: unknown): string {
@@ -121,7 +211,8 @@ function buildAssistantMessages(
       role: "system",
       content: [
         "你是同居情侣生活助手，只根据用户自托管系统里的生活数据回答。",
-        "回答要简短、温柔、可执行，不要编造系统里没有的数据。",
+        "你可以帮助整理今天的待办、快递、喝水提醒、想吃请求、纪念日和支出。",
+        "回答要简短、清晰、可执行，不要编造系统里没有的数据。",
         "如果数据不足，直接说当前本地数据还不完整。"
       ].join("\n")
     },
@@ -141,6 +232,67 @@ export async function registerLifeRoutes(
   app: FastifyInstance,
   options: LifeRouteOptions
 ): Promise<void> {
+  const parcelImageDir = resolve(options.parcelImageDir ?? "data/parcel-images");
+  const assistantStatus = options.assistantStatus ?? getDefaultAssistantStatus();
+
+  app.post("/api/parcels/images", async (request, reply) => {
+    try {
+      const body = getRecord(request.body);
+      const mediaType = normalizeParcelImageMediaType(body.mediaType);
+      const buffer = normalizeBase64Image(body.dataBase64);
+      const imageType = parcelImageMediaTypes[mediaType];
+      const fileName = `${nanoid()}.${imageType.extension}`;
+
+      mkdirSync(parcelImageDir, { recursive: true });
+      writeFileSync(join(parcelImageDir, fileName), buffer);
+
+      return reply.code(201).send({
+        image: {
+          imagePath: `/api/parcels/images/${fileName}`,
+          mediaType,
+          sizeBytes: buffer.length
+        }
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.code(400).send({
+          error: "INVALID_PARCEL_IMAGE",
+          message: error.message
+        });
+      }
+
+      throw error;
+    }
+  });
+
+  app.get("/api/parcels/images/:fileName", async (request, reply) => {
+    try {
+      const fileName = getParcelImageFileName(request.params);
+      const filePath = join(parcelImageDir, fileName);
+
+      if (!existsSync(filePath)) {
+        return reply.code(404).send({
+          error: "PARCEL_IMAGE_NOT_FOUND",
+          message: "parcel image not found"
+        });
+      }
+
+      return reply
+        .header("cache-control", "public, max-age=31536000, immutable")
+        .type(getParcelImageContentType(fileName))
+        .send(readFileSync(filePath));
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.code(400).send({
+          error: "INVALID_PARCEL_IMAGE",
+          message: error.message
+        });
+      }
+
+      throw error;
+    }
+  });
+
   app.get("/api/weather/today", async (request) => {
     const city = getQueryString(request.query, "city");
 
@@ -410,6 +562,10 @@ export async function registerLifeRoutes(
     events: listLifeEvents(options.database, 30)
   }));
 
+  app.get("/api/assistant/status", async () => ({
+    assistant: assistantStatus
+  }));
+
   app.post("/api/assistant/chat", async (request, reply) => {
     try {
       const date = getBodyDate(request.body);
@@ -419,21 +575,25 @@ export async function registerLifeRoutes(
       if (options.llmClient) {
         try {
           const modelReply = await options.llmClient.chat(buildAssistantMessages(message, dashboard));
-          return {
+          const response: AssistantChatResponse = {
             reply: modelReply,
             source: "llm",
+            assistant: assistantStatus,
             dashboard
           };
+          return response;
         } catch (error) {
           request.log.warn({ error }, "LLM assistant reply failed, falling back to local summary");
         }
       }
 
-      return {
+      const response: AssistantChatResponse = {
         reply: buildLocalAssistantReply(date, dashboard),
         source: "local",
+        assistant: assistantStatus,
         dashboard
       };
+      return response;
     } catch (error) {
       if (error instanceof Error) {
         return reply.code(400).send({

@@ -39,6 +39,10 @@ export {
 } from "./meal.js";
 
 export type {
+  AssistantChatResponse,
+  AssistantProvider,
+  AssistantReplySource,
+  AssistantStatus,
   CouplePerson,
   DashboardToday,
   Anniversary,

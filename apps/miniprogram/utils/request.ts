@@ -28,6 +28,21 @@ export function getApiBaseUrl(): string {
   return trimTrailingSlash(app.globalData?.defaultApiBaseUrl ?? "http://127.0.0.1:3000");
 }
 
+export function resolveApiUrl(value: string | null | undefined): string {
+  const normalized = `${value ?? ""}`.trim();
+
+  if (
+    normalized.length === 0 ||
+    /^(https?:|wxfile:|file:|data:|cloud:)/.test(normalized)
+  ) {
+    return normalized;
+  }
+
+  return normalized.startsWith("/")
+    ? `${getApiBaseUrl()}${normalized}`
+    : normalized;
+}
+
 export function setApiBaseUrl(value: string): string {
   const normalized = trimTrailingSlash(value.trim());
   wx.setStorageSync(apiBaseUrlKey, normalized);
@@ -45,7 +60,10 @@ export function setApiToken(value: string): string {
   return normalized;
 }
 
-export function requestApi<T>(path: string, options: { method?: string; data?: unknown } = {}): Promise<ApiResponse<T>> {
+export function requestApi<T>(
+  path: string,
+  options: { method?: string; data?: unknown; timeout?: number } = {}
+): Promise<ApiResponse<T>> {
   const apiToken = getApiToken();
 
   return new Promise((resolve) => {
@@ -54,7 +72,7 @@ export function requestApi<T>(path: string, options: { method?: string; data?: u
       method: options.method ?? "GET",
       data: options.data,
       header: apiToken.length > 0 ? { "x-couple-api-token": apiToken } : {},
-      timeout: 8000,
+      timeout: options.timeout ?? 8000,
       success(response) {
         const ok = response.statusCode >= 200 && response.statusCode < 300;
         resolve({

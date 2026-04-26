@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getEnv } from "../src/config/env.js";
-import { createLlmClient } from "../src/features/assistant/llm-client.js";
+import { createLlmClient, getLlmStatus } from "../src/features/assistant/llm-client.js";
 
 describe("LLM configuration", () => {
   it("defaults to local fallback when no provider is configured", () => {
@@ -9,6 +9,7 @@ describe("LLM configuration", () => {
     expect(env.LLM_PROVIDER).toBe("disabled");
     expect(env.LLM_BASE_URL).toBe("https://api.openai.com/v1");
     expect(env.OLLAMA_BASE_URL).toBe("http://127.0.0.1:11434");
+    expect(env.LLM_REQUEST_TIMEOUT_MS).toBe(15_000);
   });
 
   it("normalizes OpenAI-compatible provider settings", () => {
@@ -23,6 +24,47 @@ describe("LLM configuration", () => {
     expect(env.LLM_BASE_URL).toBe("https://example.com/v1/");
     expect(env.LLM_API_KEY).toBe("test-key");
     expect(env.LLM_MODEL).toBe("test-model");
+  });
+});
+
+describe("getLlmStatus", () => {
+  it("reports disabled local fallback by default", () => {
+    expect(getLlmStatus(getEnv({}))).toEqual({
+      provider: "disabled",
+      model: "gpt-4o-mini",
+      enabled: false,
+      configured: false,
+      endpoint: null,
+      message: "未启用模型，AI 小管家会使用本地摘要。"
+    });
+  });
+
+  it("reports missing key for OpenAI-compatible providers", () => {
+    expect(getLlmStatus(getEnv({
+      LLM_PROVIDER: "openai-compatible",
+      LLM_BASE_URL: "https://llm.example.com/v1/",
+      LLM_MODEL: "test-model"
+    }))).toMatchObject({
+      provider: "openai-compatible",
+      model: "test-model",
+      enabled: false,
+      configured: false,
+      endpoint: "https://llm.example.com/v1"
+    });
+  });
+
+  it("reports configured Ollama providers without an API key", () => {
+    expect(getLlmStatus(getEnv({
+      LLM_PROVIDER: "ollama",
+      OLLAMA_BASE_URL: "http://127.0.0.1:11434/",
+      LLM_MODEL: "qwen2.5:7b"
+    }))).toMatchObject({
+      provider: "ollama",
+      model: "qwen2.5:7b",
+      enabled: true,
+      configured: true,
+      endpoint: "http://127.0.0.1:11434"
+    });
   });
 });
 

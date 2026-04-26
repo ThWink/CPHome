@@ -204,4 +204,8 @@ export function runMigrations(sqlite: SqliteDatabase): void {
     create index if not exists idx_life_events_occurred_at
       on life_events(occurred_at);
   `);
+
+  if (!columnExists(sqlite, "parcels", "image_path")) {
+    sqlite.exec("alter table parcels add column image_path text");
+  }
 }

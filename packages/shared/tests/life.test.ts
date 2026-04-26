@@ -47,14 +47,16 @@ describe("life contracts", () => {
         pickupCode: "A-1024",
         location: "楼下驿站",
         owner: "partner",
-        note: "帮忙拿"
+        note: "帮忙拿",
+        imagePath: "  wxfile://parcel-shot.png  "
       })
     ).toEqual({
       title: "京东快递",
       pickupCode: "A-1024",
       location: "楼下驿站",
       owner: "partner",
-      note: "帮忙拿"
+      note: "帮忙拿",
+      imagePath: "wxfile://parcel-shot.png"
     });
   });
 

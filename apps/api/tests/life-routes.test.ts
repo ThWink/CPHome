@@ -1,7 +1,45 @@
 import { describe, expect, it } from "vitest";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { buildApp } from "../src/server/build-app.js";
 
 describe("life routes", () => {
+  it("stores parcel screenshots and serves them back", async () => {
+    const parcelImageDir = mkdtempSync(join(tmpdir(), "couple-parcel-images-"));
+    const app = await buildApp({
+      databaseUrl: ":memory:",
+      parcelImageDir
+    });
+
+    try {
+      const uploadResponse = await app.inject({
+        method: "POST",
+        url: "/api/parcels/images",
+        payload: {
+          mediaType: "image/png",
+          dataBase64: Buffer.from("fake image").toString("base64")
+        }
+      });
+
+      expect(uploadResponse.statusCode).toBe(201);
+      const imagePath = uploadResponse.json().image.imagePath;
+      expect(imagePath).toMatch(/^\/api\/parcels\/images\/.+\.png$/);
+
+      const imageResponse = await app.inject({
+        method: "GET",
+        url: imagePath
+      });
+
+      expect(imageResponse.statusCode).toBe(200);
+      expect(imageResponse.headers["content-type"]).toContain("image/png");
+      expect(imageResponse.body).toBe("fake image");
+    } finally {
+      await app.close();
+      rmSync(parcelImageDir, { recursive: true, force: true });
+    }
+  });
+
   it("returns online weather from the configured weather client", async () => {
     const app = await buildApp({
       databaseUrl: ":memory:",
@@ -165,7 +203,8 @@ describe("life routes", () => {
           pickupCode: "A-1024",
           location: "楼下驿站",
           owner: "partner",
-          note: "下班顺手拿"
+          note: "下班顺手拿",
+          imagePath: "wxfile://parcel-shot.png"
         }
       });
 
@@ -173,6 +212,7 @@ describe("life routes", () => {
       const parcel = createResponse.json().parcel;
       expect(parcel).toMatchObject({
         title: "京东快递",
+        imagePath: "wxfile://parcel-shot.png",
         status: "pending"
       });
 
@@ -184,7 +224,8 @@ describe("life routes", () => {
         parcels: [
           {
             id: parcel.id,
-            pickupCode: "A-1024"
+            pickupCode: "A-1024",
+            imagePath: "wxfile://parcel-shot.png"
           }
         ]
       });

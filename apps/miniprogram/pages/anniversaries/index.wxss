@@ -25,16 +25,17 @@
 
 .repeat-chip {
   box-sizing: border-box;
-  min-height: 62rpx;
-  padding: 12rpx;
+  min-height: 92rpx;
+  padding: 18rpx;
   border: 1rpx solid #eadfd1;
   border-radius: 14rpx;
   background: #fffdf9;
   color: #6f6255;
   font-size: 24rpx;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.5;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .repeat-chip.active {
@@ -44,6 +45,8 @@
 }
 
 .picker-input {
-  min-height: 76rpx;
-  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  min-height: 104rpx;
+  line-height: 1.5;
 }

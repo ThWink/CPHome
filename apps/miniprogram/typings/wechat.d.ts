@@ -14,6 +14,30 @@ declare const wx: {
     success?: (response: { statusCode: number; data: unknown }) => void;
     fail?: (error: unknown) => void;
   }): void;
+  chooseImage(options: {
+    count?: number;
+    sizeType?: Array<"original" | "compressed">;
+    sourceType?: Array<"album" | "camera">;
+    success?: (response: { tempFilePaths: string[] }) => void;
+    fail?: (error: unknown) => void;
+  }): void;
+  getFileSystemManager(): {
+    readFile(options: {
+      filePath: string;
+      encoding?: "base64" | "utf8";
+      success?: (response: { data: string | ArrayBuffer }) => void;
+      fail?: (error: unknown) => void;
+    }): void;
+  };
+  saveFile(options: {
+    tempFilePath: string;
+    success?: (response: { savedFilePath: string }) => void;
+    fail?: (error: unknown) => void;
+  }): void;
+  previewImage(options: {
+    current?: string;
+    urls: string[];
+  }): void;
   showToast(options: { title: string; icon?: "success" | "error" | "loading" | "none" }): void;
   setClipboardData(options: {
     data: string;

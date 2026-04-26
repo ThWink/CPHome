@@ -75,6 +75,7 @@ LLM_PROVIDER=openai-compatible
 LLM_BASE_URL=https://api.openai.com/v1
 LLM_API_KEY=your-key
 LLM_MODEL=gpt-4o-mini
+LLM_REQUEST_TIMEOUT_MS=60000
 ```
 
 For Ollama:
@@ -84,6 +85,8 @@ LLM_PROVIDER=ollama
 OLLAMA_BASE_URL=http://127.0.0.1:11434
 LLM_MODEL=qwen2.5:7b
 ```
+
+The Mini Program AI page and Settings page show `/api/assistant/status`, so you can confirm whether the current backend is using local summaries, an OpenAI-compatible endpoint, or Ollama without exposing the API key.
 
 ## Deployment
 

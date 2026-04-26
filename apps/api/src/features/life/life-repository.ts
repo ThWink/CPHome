@@ -70,6 +70,7 @@ interface ParcelRow {
   owner: Parcel["owner"];
   status: ParcelStatus;
   note: string | null;
+  image_path: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -148,6 +149,7 @@ function mapParcel(row: ParcelRow): Parcel {
     owner: row.owner,
     status: row.status,
     note: row.note,
+    imagePath: row.image_path,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -438,10 +440,11 @@ export function createParcel(database: AppDatabase, input: unknown): Parcel {
         pickup_code,
         location,
         owner,
-        note
-      ) values (?, ?, ?, ?, ?, ?)
+        note,
+        image_path
+      ) values (?, ?, ?, ?, ?, ?, ?)
     `)
-    .run(id, parsed.title, parsed.pickupCode, parsed.location, parsed.owner, parsed.note);
+    .run(id, parsed.title, parsed.pickupCode, parsed.location, parsed.owner, parsed.note, parsed.imagePath);
 
   const row = database.sqlite
     .prepare("select * from parcels where id = ?")
@@ -455,7 +458,8 @@ export function createParcel(database: AppDatabase, input: unknown): Parcel {
       parcelId: id,
       owner: parsed.owner,
       title: parsed.title,
-      location: parsed.location
+      location: parsed.location,
+      imagePath: parsed.imagePath
     }
   });
 

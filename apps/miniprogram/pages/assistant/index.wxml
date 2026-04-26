@@ -1,6 +1,6 @@
 <view class="page">
   <view class="title">AI 小管家</view>
-  <view class="subtitle">先做本地生活摘要，后续接入在线 API 和 Ollama</view>
+  <view class="subtitle">优先使用后端模型，不可用时回到本地摘要</view>
 
   <view class="hero-panel">
     <view class="row">
@@ -8,6 +8,25 @@
       <view class="source-pill">{{sourceText}}</view>
     </view>
     <view class="hero-note">{{reply}}</view>
+  </view>
+
+  <view class="section panel">
+    <view class="row">
+      <view>
+        <view class="label">AI 连接</view>
+        <view class="value">{{providerText}}</view>
+      </view>
+      <button class="button secondary refresh-button" bindtap="loadAssistantStatus">刷新</button>
+    </view>
+    <view class="status-text">{{statusText}}</view>
+    <view wx:if="{{modelText}}" class="meta-row">
+      <view class="meta-label">模型</view>
+      <view class="meta-value">{{modelText}}</view>
+    </view>
+    <view wx:if="{{endpointText}}" class="meta-row">
+      <view class="meta-label">地址</view>
+      <view class="meta-value">{{endpointText}}</view>
+    </view>
   </view>
 
   <view class="section panel">

@@ -15,6 +15,7 @@ interface SetupStatusResponse {
 
 interface DashboardResponse {
   dashboard: {
+    date: string;
     weather: {
       city: string;
       condition: string;
@@ -56,10 +57,52 @@ interface DashboardResponse {
       daysLeft: number;
     }>;
     timeline: Array<{
+      id: string;
       title: string;
       subtitle: string | null;
+      occurredAt: string;
     }>;
   };
+}
+
+interface TimelineViewItem {
+  id: string;
+  time: string;
+  text: string;
+}
+
+function pad2(value: number): string {
+  return `${value}`.padStart(2, "0");
+}
+
+function formatTimelineTime(value: string | null | undefined, dashboardDate: string): string {
+  if (!value) {
+    return "今日";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "今日";
+  }
+
+  const month = pad2(date.getMonth() + 1);
+  const day = pad2(date.getDate());
+  const time = `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+  const localDate = `${date.getFullYear()}-${month}-${day}`;
+
+  return localDate === dashboardDate ? time : `${month}-${day} ${time}`;
+}
+
+function normalizeTimelineText(title: string, subtitle: string | null): string {
+  const knownTestText: Record<string, string> = {
+    "local acceptance meal request": "本地验收想吃请求",
+    "local acceptance reminder": "本地验收喝水提醒",
+    "local vendor": "本地验收商家",
+    "acceptance check": "验收检查"
+  };
+  const normalizedSubtitle = subtitle ? knownTestText[subtitle] ?? subtitle : null;
+
+  return normalizedSubtitle ? `${title}：${normalizedSubtitle}` : title;
 }
 
 Page({
@@ -76,9 +119,17 @@ Page({
     anniversaryText: "暂无纪念日提醒",
     heroText: "把今天的小事照看好",
     timeline: [
-      "可以先去“今晚吃什么”生成外卖推荐",
-      "喝水、快递、记账和天气会在这里汇总"
-    ]
+      {
+        id: "empty-meal",
+        time: "今日",
+        text: "可以先去“今晚吃什么”生成外卖推荐"
+      },
+      {
+        id: "empty-summary",
+        time: "今日",
+        text: "喝水、快递、记账和天气会在这里汇总"
+      }
+    ] as TimelineViewItem[]
   },
 
   onLoad() {
@@ -137,18 +188,46 @@ Page({
     const anniversaries = dashboard.upcomingAnniversaries;
     const timeline = dashboard.timeline;
     const timelineItems = timeline.length > 0
-      ? timeline.map((item) => item.subtitle ? `${item.title}：${item.subtitle}` : item.title)
+      ? timeline.map((item) => ({
+        id: item.id,
+        time: formatTimelineTime(item.occurredAt, dashboard.date),
+        text: normalizeTimelineText(item.title, item.subtitle)
+      }))
       : [
-        `天气：${weather.condition}，${weather.advice}`,
-        mealRequests.length > 0
-          ? `想吃：${mealRequests[0]?.title ?? ""}`
-          : "没有待安排想吃请求",
-        waterReminders.length > 0
-          ? `喝水提醒：${waterReminders[0]?.message ?? "记得喝水"}`
-          : "没有待处理喝水提醒",
-        todos.length > 0 ? `待办：${todos[0]?.title ?? ""}` : "今天没有未完成待办",
-        parcels.length > 0 ? `快递：${parcels[0]?.pickupCode ?? ""}` : "暂无待取快递",
-        anniversaries.length > 0 ? `纪念日：${anniversaries[0]?.title ?? ""}` : "没有临近纪念日"
+        {
+          id: "fallback-weather",
+          time: "今日",
+          text: `天气：${weather.condition}，${weather.advice}`
+        },
+        {
+          id: "fallback-meal",
+          time: "今日",
+          text: mealRequests.length > 0
+            ? `想吃：${mealRequests[0]?.title ?? ""}`
+            : "没有待安排想吃请求"
+        },
+        {
+          id: "fallback-water",
+          time: "今日",
+          text: waterReminders.length > 0
+            ? `喝水提醒：${waterReminders[0]?.message ?? "记得喝水"}`
+            : "没有待处理喝水提醒"
+        },
+        {
+          id: "fallback-todo",
+          time: "今日",
+          text: todos.length > 0 ? `待办：${todos[0]?.title ?? ""}` : "今天没有未完成待办"
+        },
+        {
+          id: "fallback-parcel",
+          time: "今日",
+          text: parcels.length > 0 ? `快递：${parcels[0]?.pickupCode ?? ""}` : "暂无待取快递"
+        },
+        {
+          id: "fallback-anniversary",
+          time: "今日",
+          text: anniversaries.length > 0 ? `纪念日：${anniversaries[0]?.title ?? ""}` : "没有临近纪念日"
+        }
       ];
 
     this.setData({

@@ -7,14 +7,16 @@
 }
 
 .source-pill {
-  min-height: 44rpx;
-  padding: 8rpx 16rpx;
+  min-width: 0;
+  min-height: 72rpx;
+  padding: 14rpx 18rpx;
   border-radius: 999rpx;
   background: #eaf4e7;
   color: #2f6f62;
   font-size: 22rpx;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .weather-meta {

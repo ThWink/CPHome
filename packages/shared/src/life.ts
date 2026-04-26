@@ -15,6 +15,8 @@ export type TodoStatus = "open" | "done";
 export type AnniversaryRepeat = "none" | "yearly";
 export type CouplePerson = "self" | "partner";
 export type WaterReminderStatus = "pending" | "done";
+export type AssistantProvider = "disabled" | "openai-compatible" | "ollama";
+export type AssistantReplySource = "local" | "llm";
 export type LifeEventType =
   | "water"
   | "water_reminder"
@@ -64,6 +66,7 @@ export interface ParcelInput {
   location: string;
   owner: PersonTarget;
   note: string | null;
+  imagePath: string | null;
 }
 
 export interface Parcel extends ParcelInput {
@@ -181,6 +184,22 @@ export interface DashboardToday {
   timeline: LifeEvent[];
 }
 
+export interface AssistantStatus {
+  provider: AssistantProvider;
+  model: string;
+  enabled: boolean;
+  configured: boolean;
+  endpoint: string | null;
+  message: string;
+}
+
+export interface AssistantChatResponse {
+  reply: string;
+  source: AssistantReplySource;
+  assistant: AssistantStatus;
+  dashboard: DashboardToday;
+}
+
 const people: PersonTarget[] = ["self", "partner", "both"];
 const couplePeople: CouplePerson[] = ["self", "partner"];
 const expenseCategories: ExpenseCategory[] = [
@@ -284,7 +303,8 @@ export function parseParcelInput(input: unknown): ParcelInput {
     pickupCode: normalizeRequiredText(record.pickupCode, "pickupCode", 40),
     location: normalizeRequiredText(record.location, "location"),
     owner: normalizeEnum(record.owner, people, "owner"),
-    note: normalizeNullableText(record.note, "note")
+    note: normalizeNullableText(record.note, "note"),
+    imagePath: normalizeNullableText(record.imagePath, "imagePath", 500)
   };
 }
 

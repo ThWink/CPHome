@@ -1,6 +1,28 @@
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $PSScriptRoot
+$envFile = Join-Path $root ".env.local"
+if (Test-Path -LiteralPath $envFile) {
+  Get-Content -LiteralPath $envFile -Encoding UTF8 | ForEach-Object {
+    $line = $_.Trim()
+    if ($line.Length -eq 0 -or $line.StartsWith("#")) {
+      return
+    }
+
+    if ($line -match "^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$") {
+      $name = $Matches[1]
+      $value = $Matches[2].Trim()
+      if (
+        ($value.StartsWith('"') -and $value.EndsWith('"')) -or
+        ($value.StartsWith("'") -and $value.EndsWith("'"))
+      ) {
+        $value = $value.Substring(1, $value.Length - 2)
+      }
+      Set-Item -Path "Env:$name" -Value $value
+    }
+  }
+}
+
 $port = if ($env:PORT) { [int]$env:PORT } else { 3000 }
 $dataDir = Join-Path $root "data"
 $logDir = Join-Path $root "logs"

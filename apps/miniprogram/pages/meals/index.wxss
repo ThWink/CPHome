@@ -3,14 +3,17 @@
 }
 
 .badge {
-  min-width: 112rpx;
-  padding: 8rpx 12rpx;
+  min-width: 0;
+  max-width: 45%;
+  min-height: 72rpx;
+  padding: 14rpx 18rpx;
   border-radius: 8rpx;
   background: #efe7dc;
   color: #6c5c4c;
   font-size: 24rpx;
-  line-height: 1.25;
+  line-height: 1.5;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .action-gap {
@@ -41,8 +44,11 @@
 }
 
 .small-button {
-  min-width: 120rpx;
+  min-width: 0;
+  min-height: 88rpx;
   max-width: 156rpx;
+  padding: 16rpx 18rpx;
+  line-height: 1.5;
 }
 
 .request-row {
@@ -53,6 +59,7 @@
   margin-top: 22rpx;
   padding-top: 22rpx;
   border-top: 1rpx solid #e1d7ca;
+  flex-wrap: wrap;
 }
 
 .request-main {
@@ -62,16 +69,18 @@
 
 .request-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 12rpx;
-  width: 144rpx;
-  flex-shrink: 0;
+  width: 100%;
+  flex: 1 1 100%;
 }
 
 .action-button {
-  width: 144rpx;
-  min-height: 62rpx;
-  padding: 8rpx 10rpx;
+  width: auto;
+  min-width: 0;
+  flex: 1 1 0;
+  min-height: 88rpx;
+  padding: 16rpx 18rpx;
   font-size: 24rpx;
-  line-height: 1.25;
+  line-height: 1.5;
 }

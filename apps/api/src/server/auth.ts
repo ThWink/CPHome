@@ -43,6 +43,11 @@ function isProtectedPath(url: string): boolean {
   return url === "/api" || url.startsWith("/api/");
 }
 
+function isPublicParcelImageRequest(request: FastifyRequest): boolean {
+  const path = request.url.split("?")[0] ?? request.url;
+  return request.method === "GET" && path.startsWith("/api/parcels/images/");
+}
+
 export function registerAuthHook(app: FastifyInstance, options: AuthOptions): void {
   const apiToken = options.apiToken?.trim() ?? "";
   if (apiToken.length === 0) {
@@ -50,7 +55,7 @@ export function registerAuthHook(app: FastifyInstance, options: AuthOptions): vo
   }
 
   app.addHook("onRequest", async (request: FastifyRequest, reply: FastifyReply) => {
-    if (!isProtectedPath(request.url)) {
+    if (!isProtectedPath(request.url) || isPublicParcelImageRequest(request)) {
       return;
     }
 

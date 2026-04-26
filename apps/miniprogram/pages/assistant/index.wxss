@@ -3,9 +3,53 @@
 }
 
 .source-pill {
-  padding: 8rpx 16rpx;
+  min-height: 72rpx;
+  padding: 14rpx 18rpx;
   border-radius: 999rpx;
   background: #e7f1e7;
   color: #2f6f62;
   font-size: 24rpx;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.refresh-button {
+  min-width: 128rpx;
+  min-height: 88rpx;
+  padding: 16rpx 20rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+.status-text {
+  margin-top: 18rpx;
+  color: #6f5d4e;
+  font-size: 26rpx;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.meta-row {
+  display: flex;
+  gap: 16rpx;
+  align-items: flex-start;
+  margin-top: 14rpx;
+  flex-wrap: wrap;
+}
+
+.meta-label {
+  flex: 0 0 72rpx;
+  color: #8a7663;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.meta-value {
+  min-width: 0;
+  flex: 1 1 280rpx;
+  color: #2b2520;
+  font-size: 24rpx;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }

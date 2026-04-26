@@ -1,0 +1,109 @@
+name: Deploy Orange Pi
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: deploy-orangepi
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify
+        run: |
+          pnpm test
+          pnpm typecheck
+          pnpm build
+
+      - name: Prepare SSH
+        env:
+          ORANGE_PI_SSH_KEY: ${{ secrets.ORANGE_PI_SSH_KEY }}
+          ORANGE_PI_HOST: ${{ secrets.ORANGE_PI_HOST }}
+          ORANGE_PI_PORT: ${{ secrets.ORANGE_PI_PORT }}
+        run: |
+          test -n "$ORANGE_PI_SSH_KEY"
+          test -n "$ORANGE_PI_HOST"
+          test -n "$ORANGE_PI_PORT"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$ORANGE_PI_SSH_KEY" > ~/.ssh/orangepi_key
+          chmod 600 ~/.ssh/orangepi_key
+          ssh-keyscan -p "$ORANGE_PI_PORT" "$ORANGE_PI_HOST" >> ~/.ssh/known_hosts
+
+      - name: Package source
+        run: |
+          mkdir -p /tmp/cphome-release
+          tar \
+            --exclude='.git' \
+            --exclude='.superpowers' \
+            --exclude='.worktrees' \
+            --exclude='node_modules' \
+            --exclude='**/node_modules' \
+            --exclude='dist' \
+            --exclude='**/dist' \
+            --exclude='coverage' \
+            --exclude='data' \
+            --exclude='logs' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='deploy/.env' \
+            --exclude='apps/miniprogram/*.js' \
+            --exclude='apps/miniprogram/*/*.js' \
+            --exclude='apps/miniprogram/*/*/*.js' \
+            --exclude='apps/miniprogram/project.config.json' \
+            --exclude='apps/miniprogram/project.private.config.json' \
+            --exclude='功能.md' \
+            -czf /tmp/cphome-release/source.tar.gz .
+
+      - name: Upload source
+        env:
+          ORANGE_PI_HOST: ${{ secrets.ORANGE_PI_HOST }}
+          ORANGE_PI_PORT: ${{ secrets.ORANGE_PI_PORT }}
+          ORANGE_PI_USER: ${{ secrets.ORANGE_PI_USER }}
+          ORANGE_PI_PROJECT_DIR: ${{ secrets.ORANGE_PI_PROJECT_DIR }}
+        run: |
+          : "${ORANGE_PI_USER:=orangepi}"
+          : "${ORANGE_PI_PROJECT_DIR:=/mnt/sdcard/workspace/cphome}"
+          ssh -i ~/.ssh/orangepi_key -p "$ORANGE_PI_PORT" "$ORANGE_PI_USER@$ORANGE_PI_HOST" "mkdir -p '$ORANGE_PI_PROJECT_DIR' '$ORANGE_PI_PROJECT_DIR/.deploy'"
+          scp -i ~/.ssh/orangepi_key -P "$ORANGE_PI_PORT" /tmp/cphome-release/source.tar.gz "$ORANGE_PI_USER@$ORANGE_PI_HOST:$ORANGE_PI_PROJECT_DIR/.deploy/source.tar.gz"
+
+      - name: Deploy
+        env:
+          ORANGE_PI_HOST: ${{ secrets.ORANGE_PI_HOST }}
+          ORANGE_PI_PORT: ${{ secrets.ORANGE_PI_PORT }}
+          ORANGE_PI_USER: ${{ secrets.ORANGE_PI_USER }}
+          ORANGE_PI_PROJECT_DIR: ${{ secrets.ORANGE_PI_PROJECT_DIR }}
+        run: |
+          : "${ORANGE_PI_USER:=orangepi}"
+          : "${ORANGE_PI_PROJECT_DIR:=/mnt/sdcard/workspace/cphome}"
+          ssh -i ~/.ssh/orangepi_key -p "$ORANGE_PI_PORT" "$ORANGE_PI_USER@$ORANGE_PI_HOST" "
+            set -eu
+            cd '$ORANGE_PI_PROJECT_DIR'
+            tar -xzf .deploy/source.tar.gz
+            test -f deploy/.env
+            mkdir -p .deploy/docker-config
+            printf %s eyJhdXRocyI6e319 | base64 -d > .deploy/docker-config/config.json
+            docker --config '$ORANGE_PI_PROJECT_DIR/.deploy/docker-config' compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --build
+            docker --config '$ORANGE_PI_PROJECT_DIR/.deploy/docker-config' compose --env-file deploy/.env -f deploy/docker-compose.yml ps
+            curl -fsS http://127.0.0.1:3000/health/ready
+          "

@@ -13,6 +13,19 @@ interface ReadyResponse {
   };
 }
 
+interface AssistantStatus {
+  provider: "disabled" | "openai-compatible" | "ollama";
+  model: string;
+  enabled: boolean;
+  configured: boolean;
+  endpoint: string | null;
+  message: string;
+}
+
+interface AssistantStatusResponse {
+  assistant: AssistantStatus;
+}
+
 interface MealMemory {
   id: string;
   content: string;
@@ -70,11 +83,27 @@ const sentimentLabels: Record<TastePreference["sentiment"], string> = {
   avoid: "避免"
 };
 
+function getAssistantProviderText(status: AssistantStatus): string {
+  if (status.provider === "openai-compatible") {
+    return status.enabled ? "在线模型" : "OpenAI 兼容接口未完成配置";
+  }
+
+  if (status.provider === "ollama") {
+    return "Ollama";
+  }
+
+  return "本地摘要";
+}
+
 Page({
   data: {
     apiBaseUrl: "",
     apiToken: "",
     healthText: "未检查",
+    assistantProviderText: "未检查",
+    assistantStatusText: "未检查",
+    assistantModelText: "",
+    assistantEndpointText: "",
     memoryText: "未加载",
     backupText: "还没有生成备份",
     restoreText: "未导入备份",
@@ -94,6 +123,7 @@ Page({
   },
 
   onShow() {
+    void this.checkAssistantStatus();
     void this.loadMemoryData();
   },
 
@@ -121,6 +151,27 @@ Page({
     const response = await requestApi<ReadyResponse>("/health/ready");
     this.setData({
       healthText: response.ok ? `后端正常，数据库 ${response.data?.checks.database}` : "后端未连接"
+    });
+  },
+
+  async checkAssistantStatus() {
+    const response = await requestApi<AssistantStatusResponse>("/api/assistant/status");
+    if (!response.ok || !response.data) {
+      this.setData({
+        assistantProviderText: "未连接",
+        assistantStatusText: response.statusCode === 401 ? "Token 未填写或不正确" : "AI 状态未连接",
+        assistantModelText: "",
+        assistantEndpointText: ""
+      });
+      return;
+    }
+
+    const status = response.data.assistant;
+    this.setData({
+      assistantProviderText: getAssistantProviderText(status),
+      assistantStatusText: status.message,
+      assistantModelText: status.model,
+      assistantEndpointText: status.endpoint ?? ""
     });
   },
 

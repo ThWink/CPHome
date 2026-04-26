@@ -237,7 +237,7 @@ export async function runLocalAcceptance(
           fromPerson: "self",
           targetPerson: "partner",
           remindOn: options.today,
-          message: "local acceptance reminder"
+          message: "本地验收喝水提醒"
         }
       }
     );
@@ -307,9 +307,9 @@ export async function runLocalAcceptance(
         body: {
           requester: "self",
           target: "partner",
-          title: "local acceptance meal request",
-          vendorName: "local vendor",
-          note: "acceptance check"
+          title: "本地验收想吃请求",
+          vendorName: "本地验收商家",
+          note: "验收检查"
         }
       }
     );
