@@ -105,5 +105,12 @@ jobs:
             printf %s eyJhdXRocyI6e319 | base64 -d > .deploy/docker-config/config.json
             docker --config '$ORANGE_PI_PROJECT_DIR/.deploy/docker-config' compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --build
             docker --config '$ORANGE_PI_PROJECT_DIR/.deploy/docker-config' compose --env-file deploy/.env -f deploy/docker-compose.yml ps
-            curl -fsS http://127.0.0.1:3000/health/ready
+            for attempt in \$(seq 1 45); do
+              if curl -fsS http://127.0.0.1:3000/health/ready; then
+                exit 0
+              fi
+              sleep 2
+            done
+            docker logs --tail 120 couple-life-assistant-api
+            exit 1
           "
